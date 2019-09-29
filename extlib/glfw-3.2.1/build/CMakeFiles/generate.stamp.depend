@@ -1,0 +1,33 @@
+# CMake generation dependency list for this directory.
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/CMakeLists.txt
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/build/CMakeFiles/3.11.2/CMakeSystem.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/build/CMakeFiles/3.11.2/CMakeCCompiler.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/Platform/Windows.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/Platform/WindowsPaths.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/Platform/Windows-MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/Platform/Windows-MSVC.cmake
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/build/CMakeFiles/3.11.2/CMakeRCCompiler.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/FindThreads.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CheckLibraryExists.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CheckSymbolExists.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/FindPackageMessage.cmake
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/CMake/modules/FindVulkan.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.11/Modules/WriteBasicConfigVersionFile.cmake
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/src/glfw3Config.cmake.in
+C:/Program Files/CMake/share/cmake-3.11/Modules/BasicConfigVersion-SameMajorVersion.cmake.in
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/src/glfw_config.h.in
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/src/glfw3.pc.in
+C:/Users/Henry/source/repos/GLPong/libs/glfw-3.2.1/cmake_uninstall.cmake.in
