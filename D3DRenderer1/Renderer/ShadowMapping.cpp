@@ -149,7 +149,8 @@ void DirectionalShadowMap::bindDepthTexturePS(int samplerStateBinding, int textu
 
 void DirectionalShadowMap::unbindDepthTexturePS(int textureBinding)
 {
-	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(textureBinding, 0, nullptr);
+	ID3D11ShaderResourceView* nullview = nullptr;
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(textureBinding, 1, &nullview);
 }
 
 void DirectionalShadowMap::bindShadowCamera(int constBufferBinding)
