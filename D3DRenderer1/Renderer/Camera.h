@@ -22,6 +22,7 @@ public:
 	bool init(float width, float height, float fovDeg, float minDepth, float maxDepth);
 
 	void update();
+	void bind(int bindingPoint);
 
 	perspectiveCameraChangeInfo cameraChangeInfo = {};
 

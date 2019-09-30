@@ -83,6 +83,11 @@ int main()
 	m_object2.scale(XMVectorSet(10, 10, 10, 10));
 	m_object2.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 1.0f));
+	Object m_object3;
+	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
+	m_object3.scale(XMVectorSet(10, 10, 10, 10));
+	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
+	m_object3.translate(XMVectorSet(0.0f, 0.0f, -15.0f, 1.0f));
 
 
 	RenderPass m_renderPass;
@@ -110,6 +115,10 @@ int main()
 	//Calculating deltatime
 	float oldTime = 0, newTime=0, deltaTime=1;
 	float cameraSpeed = 250.0f;
+
+	//These are set before because binds per-frame is TERRIBLE for performance.
+	m_lightUploadBuffer.uploadToPixelShader(0);
+	m_shadowMap.bindShadowCamera(2);
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glfwPollEvents();
@@ -130,6 +139,7 @@ int main()
 		m_shadowMap.beginFrame(m_basicLight);
 		m_object.draw();
 		m_object2.draw();
+		m_object3.draw();
 		m_shadowMap.endFrame();
 
 		D3DContext::setViewport(WIDTH, HEIGHT);
@@ -138,15 +148,14 @@ int main()
 
 		//CPU Updating
 		m_camera.update();
+		m_camera.bind(0);
 		m_lightUploadBuffer.update((void*)&m_basicLight, sizeof(DirectionalLight));
-		m_lightUploadBuffer.uploadToPixelShader(0);
-		m_shadowMap.bindShadowCamera(2);
 		m_shadowMap.bindDepthTexturePS(1, 1);
 
 		//GPU Drawing
 		m_object.draw();
 		m_object2.draw();
-
+		m_object3.draw();
 		m_shadowMap.unbindDepthTexturePS(1);
 
 		ImGui::Render();

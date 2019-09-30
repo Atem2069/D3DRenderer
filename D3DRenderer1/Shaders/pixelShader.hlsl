@@ -38,8 +38,8 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 
 	float shadow = 0.0;
 	float2 texelSize;
-	//shadowTex.GetDimensions(texelSize.x,texelSize.y);
-	texelSize = 1.0f / float2(4096, 4096);
+	shadowTex.GetDimensions(texelSize.x,texelSize.y);
+	texelSize = 1.0f / texelSize;
 	for (int x = -2; x <= 2; ++x)
 	{
 		for (int y = -2; y <= 2; ++y)

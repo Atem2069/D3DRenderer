@@ -45,9 +45,11 @@ void PerspectiveCamera::update()
 	memcpy(bufferPtr.pData, &m_cameraBuffer, sizeof(cb_perspectiveCamera));
 	D3DContext::getCurrent()->getDeviceContext()->Unmap(m_constBuffer, 0);
 
+}
 
-	//Bind
-	D3DContext::getCurrent()->getDeviceContext()->VSSetConstantBuffers(0, 1, &m_constBuffer);	//Hardcoded to register 0
+void PerspectiveCamera::bind(int bindingPoint)
+{
+	D3DContext::getCurrent()->getDeviceContext()->VSSetConstantBuffers(bindingPoint, 1, &m_constBuffer);
 }
 
 XMMATRIX PerspectiveCamera::getProjection() { return m_projection; }
