@@ -91,8 +91,8 @@ bool DirectionalShadowMap::init(float width, float height, float orthoWidth, flo
 
 	D3D11_RASTERIZER_DESC rstateDesc = {};
 	rstateDesc.AntialiasedLineEnable = FALSE;
-	rstateDesc.CullMode = D3D11_CULL_FRONT;
-	rstateDesc.DepthBias = 0.0f;
+	rstateDesc.CullMode = D3D11_CULL_BACK;
+	rstateDesc.DepthBias = 0.006f;
 	rstateDesc.DepthBiasClamp = 0.0f;
 	rstateDesc.DepthClipEnable = TRUE;
 	rstateDesc.FillMode = D3D11_FILL_SOLID;

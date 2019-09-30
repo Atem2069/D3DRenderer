@@ -105,7 +105,7 @@ int main()
 		return -1;
 
 	DirectionalShadowMap m_shadowMap;
-	if (!m_shadowMap.init(2048,2048, 2048,2048, m_basicLight))
+	if (!m_shadowMap.init(4096,4096, 2048,2048, m_basicLight))
 		return -1;
 
 	//For camera
