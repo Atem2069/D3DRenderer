@@ -22,16 +22,7 @@ public:
 	ID3D11ShaderResourceView* getTextureView();
 	int m_channels;
 private:
-	void fast_unpack(unsigned char* rgba, const unsigned char* rgb, const int count) {
-		if (count == 0)
-			return;
-		for (int i = count; --i; rgba += 4, rgb += 3) {
-			*(uint32_t*)(void*)rgba = *(const uint32_t*)(const void*)rgb;
-		}
-		for (int j = 0; j < 3; ++j) {
-			rgba[j] = rgb[j];
-		}
-	}
+	void unpackRGBToRGBA(int width, int height, unsigned char * input, unsigned char * output);
 	ID3D11Texture2D* m_texture;
 	ID3D11ShaderResourceView* m_textureView;
 };

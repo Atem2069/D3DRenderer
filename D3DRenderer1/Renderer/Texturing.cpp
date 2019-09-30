@@ -9,13 +9,22 @@ bool Texture2D::init(std::string filePath)
 		std::cout << "Failed to load image... check format or filepath" << std::endl;
 		return false; 
 	}
+	unsigned char * rgbaImgData = (unsigned char *)malloc(width*height * 4);
+	//Figuring out format to use.
+	DXGI_FORMAT texFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	if (m_channels == 3)
+		this->unpackRGBToRGBA(width, height, imagedata,rgbaImgData);
+	if (m_channels == 2)
+		texFormat = DXGI_FORMAT_R8G8_UNORM;
+	if (m_channels == 1)
+		texFormat = DXGI_FORMAT_R8_UNORM;
 
 	D3D11_TEXTURE2D_DESC texDesc = {};
 	//D3D11_SUBRESOURCE_DATA texInitialData = {};
 	texDesc.ArraySize = 1;
 	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	texDesc.CPUAccessFlags = 0;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	texDesc.Format = texFormat;
 	texDesc.Width = width;
 	texDesc.Height = height;
 	texDesc.MipLevels = 0;
@@ -46,9 +55,15 @@ bool Texture2D::init(std::string filePath)
 		std::cout << "Failed to create res view for texture.." << std::endl;
 		return false;
 	}
-
-	D3DContext::getCurrent()->getDeviceContext()->UpdateSubresource(m_texture, 0, NULL, imagedata, width * m_channels, 0);
+	if (m_channels == 3)
+	{
+		m_channels += 1;
+		D3DContext::getCurrent()->getDeviceContext()->UpdateSubresource(m_texture, 0, nullptr, rgbaImgData, width*m_channels, 0);
+	}
+	else
+		D3DContext::getCurrent()->getDeviceContext()->UpdateSubresource(m_texture, 0, NULL, imagedata, width * m_channels, 0);
 	stbi_image_free(imagedata);	//Free as memleaks are bad
+	delete[] rgbaImgData;
 	D3DContext::getCurrent()->getDeviceContext()->GenerateMips(m_textureView);
 
 	if (FAILED(result))
@@ -73,3 +88,17 @@ void Texture2D::bind(int textureBindingPoint)
 
 ID3D11Texture2D* Texture2D::getTexture() { return m_texture; }
 ID3D11ShaderResourceView* Texture2D::getTextureView() { return m_textureView; }
+
+void Texture2D::unpackRGBToRGBA(int width, int height, unsigned char * input, unsigned char * output)	//(un)safe method of unpacking RGB to RGBA, feat char pointers
+{
+
+	for (int i = 0, j = 0; i < width*height * 4; i += 4, j += 3)
+	{
+		//the most basic copy in the entire world
+		output[i] = input[j];
+		output[i + 1] = input[j + 1];
+		output[i + 2] = input[j + 2];
+		output[i + 3] = 0xFFFFFFFF;	//255?
+	}
+
+}
