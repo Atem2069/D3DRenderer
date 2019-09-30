@@ -85,7 +85,6 @@ bool Object::init(std::string path)
 					material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath);
 					std::string texFile = texPath.C_Str();
 					std::string texturePath = dir + texFile;
-					std::cout <<"Loading: " << texturePath << std::endl;
 					tempMesh.m_material.m_albedoTexture.init(texturePath);
 				}
 			}

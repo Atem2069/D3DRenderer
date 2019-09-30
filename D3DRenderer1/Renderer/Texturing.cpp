@@ -20,7 +20,6 @@ bool Texture2D::init(std::string filePath)
 		texFormat = DXGI_FORMAT_R8_UNORM;
 
 	D3D11_TEXTURE2D_DESC texDesc = {};
-	//D3D11_SUBRESOURCE_DATA texInitialData = {};
 	texDesc.ArraySize = 1;
 	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	texDesc.CPUAccessFlags = 0;
@@ -33,8 +32,6 @@ bool Texture2D::init(std::string filePath)
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	
-	//texInitialData.pSysMem = imagedata;
-	//texInitialData.SysMemPitch = width * m_channels;
 
 	HRESULT result = D3DContext::getCurrent()->getDevice()->CreateTexture2D(&texDesc, nullptr, &m_texture);
 	if (FAILED(result))
