@@ -7,6 +7,7 @@ bool Texture2D::init(std::string filePath)
 	if (!imagedata)
 	{
 		std::cout << "Failed to load image... check format or filepath" << std::endl;
+		std::cout << "Erroring image path: " << filePath << std::endl;
 		return false; 
 	}
 	unsigned char * rgbaImgData = (unsigned char *)malloc(width*height * 4);

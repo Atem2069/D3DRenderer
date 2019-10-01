@@ -77,11 +77,11 @@ bool DirectionalShadowMap::init(float width, float height, float orthoWidth, flo
 	m_samplerStateDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	m_samplerStateDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	m_samplerStateDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	m_samplerStateDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	m_samplerStateDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	m_samplerStateDesc.ComparisonFunc = D3D11_COMPARISON_GREATER;
 	m_samplerStateDesc.MinLOD = 0;
 	m_samplerStateDesc.MaxLOD = 0;
 	m_samplerStateDesc.MaxAnisotropy = 0;
-	m_samplerStateDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	result = D3DContext::getCurrent()->getDevice()->CreateSamplerState(&m_samplerStateDesc, &m_samplerState);
 	if (FAILED(result))
 	{

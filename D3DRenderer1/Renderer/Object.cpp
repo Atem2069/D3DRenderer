@@ -7,7 +7,7 @@ bool Object::init(std::string path)
 	ID3D11Device* device = D3DContext::getCurrent()->getDevice();	//Save device ref for creating buffers 
 
 	Assimp::Importer m_importer;
-	const aiScene* m_scene = m_importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_OptimizeMeshes);	//Convert to left handed cause d3d coordinates are special
+	const aiScene* m_scene = m_importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_OptimizeMeshes | aiProcess_GenSmoothNormals);	//Convert to left handed cause d3d coordinates are special
 
 	if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
 	{

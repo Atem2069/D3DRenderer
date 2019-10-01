@@ -5,6 +5,7 @@
 
 #include "BaseRenderer.h"	//For device references
 #include <iostream>
+#include <string>
 
 //stb image for img loading
 #include <stb_image.h>

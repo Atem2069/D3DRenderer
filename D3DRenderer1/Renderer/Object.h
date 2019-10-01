@@ -17,7 +17,6 @@ struct ObjectTransformation
 
 struct Material
 {
-	//todo
 	Texture2D m_albedoTexture;
 	int m_materialIndex = 0;
 };

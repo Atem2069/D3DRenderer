@@ -23,7 +23,7 @@ Texture2D albedoTex : register(t0);
 SamplerState samplerState : register(s0);
 
 Texture2D shadowTex : register(t1);
-SamplerState shadowSampler : register(s1);
+SamplerComparisonState shadowSampler : register(s1);
 
 float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir)
 {
@@ -40,12 +40,13 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 	float2 texelSize;
 	shadowTex.GetDimensions(texelSize.x,texelSize.y);
 	texelSize = 1.0f / texelSize;
-	for (int x = -2; x <= 2; ++x)
+	for (int x = -1; x <= 1; ++x)
 	{
-		for (int y = -2; y <= 2; ++y)
+		for (int y = -1; y <= 1; ++y)
 		{
-			float pcfDepth = shadowTex.Sample(shadowSampler, projCoords.xy + float2(x, y) * texelSize).r;
-			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+			//float pcfDepth = shadowTex.Sample(shadowSampler, projCoords.xy + float2(x, y) * texelSize).r;
+			//shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+			shadow += shadowTex.SampleCmpLevelZero(shadowSampler, projCoords.xy + float2(x, y)*texelSize, currentDepth - bias).r;
 		}
 	}
 	shadow /= 25.0;
@@ -56,6 +57,8 @@ float4 main(VS_OUT input) : SV_TARGET
 {
 
 	float4 texColor = albedoTex.Sample(samplerState,input.texCoord);
+	float avgTexColor = (texColor.r + texColor.g + texColor.b + texColor.a) / 4.0;
+	texColor = (avgTexColor == 0) ? 1.0f : texColor;
 
 	float3 ambient = 0.1f * light.color.xyz;
 
