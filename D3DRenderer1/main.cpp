@@ -192,8 +192,6 @@ int main()
 			pitch += 0.5f * deltaTime * cameraSpeed;
 		if (glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
 			pitch -= 0.5f * deltaTime * cameraSpeed;
-		if (glfwGetKey(m_window, GLFW_KEY_F) == GLFW_PRESS)
-			m_basicLight.direction.x += 5.0f;
 		deltaTime = newTime - oldTime;
 		oldTime = newTime;
 		newTime = glfwGetTime();

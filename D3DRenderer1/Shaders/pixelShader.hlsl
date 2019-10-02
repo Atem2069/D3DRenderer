@@ -40,9 +40,9 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 	float2 texelSize;
 	shadowTex.GetDimensions(texelSize.x,texelSize.y);
 	texelSize = 1.0f / texelSize;
-	for (int x = -1; x <= 1; ++x)
+	for (int x = -2; x <= 2; ++x)
 	{
-		for (int y = -1; y <= 1; ++y)
+		for (int y = -2; y <= 2; ++y)
 		{
 			//float pcfDepth = shadowTex.Sample(shadowSampler, projCoords.xy + float2(x, y) * texelSize).r;
 			//shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
@@ -65,13 +65,15 @@ float4 main(VS_OUT input) : SV_TARGET
 	float3 lightDir = normalize(-light.direction.xyz);
 	float3 norm = normalize(input.normal.xyz);
 
-	float diff = max(dot(norm, lightDir), 0.0f);
+	float diffuseIntensity = 1.0f;
+	float diff = max(dot(norm, lightDir), 0.0f) * diffuseIntensity;
 	float3 diffuse = light.color.xyz * diff;
 
 	float3 viewDir = normalize(input.campos - input.fragpos);
 	float3 halfwayDir = normalize(lightDir + viewDir);
 
-	float spec = pow(max(dot(norm, halfwayDir), 0.0f), 64.0f);
+	float specularIntensity = 1.0f;
+	float spec = pow(max(dot(norm, halfwayDir), 0.0f), 64.0f) * specularIntensity;
 	float3 specular = light.color.xyz * spec;
 
 	float shadow = shadowCalculation(input.fragposlightspace,norm,lightDir);

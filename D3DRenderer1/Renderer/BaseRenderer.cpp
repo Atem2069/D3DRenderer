@@ -215,10 +215,11 @@ bool D3DContext::present(bool doVsync)
 {
 	HRESULT result;
 	result = m_current->getSwapChain()->Present(doVsync, 0);
-	if (result == DXGI_ERROR_DEVICE_REMOVED || result == DXGI_ERROR_DEVICE_HUNG || result == DXGI_ERROR_DEVICE_RESET)
+	if (result == DXGI_ERROR_DEVICE_REMOVED)
 	{
 		std::cout << "DXGI present error. Device was removed or reset." << std::endl;
 		std::cout << "HRESULT: " << result << std::endl;
+		std::cout << "Device removed reason: " << m_current->getDevice()->GetDeviceRemovedReason() << std::endl;
 		return false;
 	}
 
