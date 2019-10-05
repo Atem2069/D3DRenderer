@@ -29,13 +29,14 @@ bool D3D::init(int width, int height, bool fullscreen, HWND hwnd, int MSAALevels
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 1;
 	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
-	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
+	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_CENTERED;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.OutputWindow = hwnd;
 	swapChainDesc.SampleDesc.Count = MSAALevels;
 	swapChainDesc.SampleDesc.Quality = MSAAQuality;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Windowed = !fullscreen;
+	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 
 	//Could use IDXGIFactory2::CreateSwapChainForHwnd but then fuckery is required to get MSAA

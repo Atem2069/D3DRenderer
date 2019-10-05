@@ -59,6 +59,8 @@ float4 main(VS_OUT input) : SV_TARGET
 {
 
 	float4 texColor = albedoTex.Sample(samplerState,input.texCoord);
+	if (texColor.a < 0.5f)
+		discard;
 	float avgTexColor = (texColor.r + texColor.g + texColor.b + texColor.a) / 4.0;
 	texColor = (avgTexColor == 0) ? 1.0f : texColor;
 

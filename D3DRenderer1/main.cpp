@@ -24,6 +24,7 @@
 
 #define WIDTH 1600
 #define HEIGHT 900
+#define FULLSCREEN 0
 
 bool doVsync = false;
 
@@ -38,7 +39,7 @@ int main()
 		return -1;
 	}
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);	//Don't want an OpenGL context. just a window
-	GLFWwindow* m_window = glfwCreateWindow(WIDTH, HEIGHT, "Direct3D", nullptr, nullptr);
+	GLFWwindow* m_window = glfwCreateWindow(WIDTH, HEIGHT, "Direct3D", (FULLSCREEN) ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 	if (!m_window)
 	{
 		std::cout << "Failed to create a win32 window." << std::endl;
