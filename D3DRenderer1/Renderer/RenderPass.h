@@ -43,7 +43,7 @@ public:
 
 	void begin(float r, float g, float b);
 
-	void bindRenderTargets(int startLocation);
+	void bindRenderTargets(int startLocation, int samplerBinding);
 	void unbindRenderTargets(int startLocation);
 
 	std::vector<ID3D11ShaderResourceView*> getRenderBufferViews();
