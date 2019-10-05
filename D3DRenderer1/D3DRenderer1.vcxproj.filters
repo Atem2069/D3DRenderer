@@ -25,6 +25,9 @@
     <Filter Include="Shaders\Deferred Quad">
       <UniqueIdentifier>{90fee2fb-aec3-4b1f-8334-cacbb059c131}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Deferred">
+      <UniqueIdentifier>{c07e349c-fa70-4940-9fb4-607b9a44e9d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -153,6 +156,12 @@
     </FxCompile>
     <FxCompile Include="Shaders\DeferredQuad\vertexShader.hlsl">
       <Filter>Shaders\Deferred Quad</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Deferred\pixelShader.hlsl">
+      <Filter>Shaders\Deferred</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Deferred\vertexShader.hlsl">
+      <Filter>Shaders\Deferred</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

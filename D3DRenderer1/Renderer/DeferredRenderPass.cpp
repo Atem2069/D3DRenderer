@@ -14,7 +14,7 @@ bool DeferredRenderPass::init(int width, int height, int noRenderTargets, int MS
 		backBufferDesc.ArraySize = 1;
 		backBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 		backBufferDesc.CPUAccessFlags = 0;
-		backBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		backBufferDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		backBufferDesc.Width = width;
 		backBufferDesc.Height = height;
 		backBufferDesc.MipLevels = 1;
@@ -31,7 +31,7 @@ bool DeferredRenderPass::init(int width, int height, int noRenderTargets, int MS
 		}
 
 		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		rtvDesc.Format = backBufferDesc.Format;
 		rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 		
 		result = D3DContext::getCurrent()->getDevice()->CreateRenderTargetView(m_renderBuffers[i], &rtvDesc, &m_renderTargetViews[i]);
@@ -42,7 +42,7 @@ bool DeferredRenderPass::init(int width, int height, int noRenderTargets, int MS
 		}
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		srvDesc.Format = backBufferDesc.Format;
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 
 		result = D3DContext::getCurrent()->getDevice()->CreateShaderResourceView(m_renderBuffers[i], &srvDesc, &m_renderBufferViews[i]);
@@ -124,7 +124,7 @@ void DeferredRenderPass::bindRenderTargets(int startLocation, int samplerBinding
 
 void DeferredRenderPass::unbindRenderTargets(int startLocation)
 {
-	ID3D11ShaderResourceView* views[8];
+	ID3D11ShaderResourceView* views[8] = { nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
 	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(startLocation, m_noRenderTargets, views);
 }
 

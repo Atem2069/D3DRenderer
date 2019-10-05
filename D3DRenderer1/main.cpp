@@ -28,7 +28,7 @@
 
 bool doVsync = false;
 
-int MultisampleLevel = 4;
+int MultisampleLevel = 1;
 int MultisampleQuality = 0;
 
 int main()
@@ -67,10 +67,10 @@ int main()
 
 	//Now intializing direct3d stuff
 	VertexShader m_vertexShader;
-	if (!m_vertexShader.init(R"(Shaders\vertexShader.hlsl)"))
+	if (!m_vertexShader.init(R"(Shaders\Deferred\vertexShader.hlsl)"))
 		return -1;
 	PixelShader m_pixelShader;
-	if (!m_pixelShader.init(R"(Shaders\pixelShader.hlsl)"))
+	if (!m_pixelShader.init(R"(Shaders\Deferred\pixelShader.hlsl)"))
 		return -1;
 
 	PerspectiveCamera m_camera;
@@ -96,8 +96,8 @@ int main()
 	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF,1,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
 		return -1;
 	m_renderPass.specifyRenderTarget(D3DContext::getCurrent()->getBackBuffer());	//Change render target to hardware render target
-	RenderPass m_deferredRenderPass;
-	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, MultisampleLevel, MultisampleQuality))
+	DeferredRenderPass m_deferredRenderPass;
+	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, 4, MultisampleLevel,MultisampleQuality))
 		return -1;
 
 
@@ -170,23 +170,25 @@ int main()
 		m_camera.update();
 		m_camera.bind(0);
 		m_lightUploadBuffer.update((void*)&m_basicLight, sizeof(DirectionalLight));
-		m_shadowMap.bindDepthTexturePS(1, 1);
+
 
 		//GPU Drawing
 		m_object.draw();
 		m_object2.draw();
 		m_object3.draw();
-		m_shadowMap.unbindDepthTexturePS(1);
-
-		ImGui::Render();
-		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 		m_renderPass.begin(1.0f, 1.0f, 1.0f);
 		m_qVertexShader.bind();
 		m_qPixelShader.bind();
-		m_deferredRenderPass.bindRenderTargetSRV(0, 0);
+
+		m_shadowMap.bindDepthTexturePS(1, 4);
+		m_deferredRenderPass.bindRenderTargets(0, 0);
 		m_fsQuad.draw();
-		m_deferredRenderPass.unbindRenderTargetSRV(0);	//Necessary to stop undefined behaviour
+		m_shadowMap.unbindDepthTexturePS(4);
+		m_deferredRenderPass.unbindRenderTargets(0);	//Necessary to stop undefined behaviour
+
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 
 		if (!D3DContext::present(doVsync))
