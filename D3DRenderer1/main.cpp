@@ -27,7 +27,7 @@
 
 bool doVsync = false;
 
-int MultisampleLevel = 8;
+int MultisampleLevel = 4;
 int MultisampleQuality = 0;
 
 int main()
@@ -48,7 +48,8 @@ int main()
 	HWND hwnd = glfwGetWin32Window(m_window);
 
 	D3D m_context;
-	m_context.init(WIDTH, HEIGHT, hwnd,1,MultisampleQuality);
+	if (!m_context.init(WIDTH, HEIGHT, hwnd, 1, MultisampleQuality))
+		return -1;
 
 	//Make this d3d context the global current one
 	D3DContext::Register(m_context);
