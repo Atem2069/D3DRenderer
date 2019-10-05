@@ -22,6 +22,9 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{033268ae-089d-412b-a7d1-91cf59f3d584}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Deferred Quad">
+      <UniqueIdentifier>{90fee2fb-aec3-4b1f-8334-cacbb059c131}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -141,6 +144,12 @@
     </FxCompile>
     <FxCompile Include="Shaders\Shadow\pixelShader.hlsl">
       <Filter>Shaders\Shadow Mapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DeferredQuad\pixelShader.hlsl">
+      <Filter>Shaders\Deferred Quad</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DeferredQuad\vertexShader.hlsl">
+      <Filter>Shaders\Deferred Quad</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
