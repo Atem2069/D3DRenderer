@@ -27,7 +27,7 @@
 
 bool doVsync = false;
 
-int MultisampleLevel = 4;
+int MultisampleLevel = 8;
 int MultisampleQuality = 0;
 
 int main()
@@ -48,7 +48,7 @@ int main()
 	HWND hwnd = glfwGetWin32Window(m_window);
 
 	D3D m_context;
-	m_context.init(WIDTH, HEIGHT, hwnd,MultisampleLevel,MultisampleQuality);
+	m_context.init(WIDTH, HEIGHT, hwnd,1,MultisampleQuality);
 
 	//Make this d3d context the global current one
 	D3DContext::Register(m_context);
@@ -91,7 +91,7 @@ int main()
 
 
 	RenderPass m_renderPass;
-	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF,MultisampleLevel,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
+	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF,1,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
 		return -1;
 	m_renderPass.specifyRenderTarget(D3DContext::getCurrent()->getBackBuffer());	//Change render target to hardware render target
 	RenderPass m_deferredRenderPass;

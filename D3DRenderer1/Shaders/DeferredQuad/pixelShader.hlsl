@@ -26,5 +26,8 @@ float4 main(VS_OUT input) : SV_TARGET0
 	newTexCoords.y = input.texcoord.y * newTexCoords.y;
 	
 	float4 albedo = MSAAResolve(resultTex, newTexCoords.z, newTexCoords.xy);
+
+	float gamma = 2.2;
+	albedo.rgb = pow(albedo.rgb, 1.0 / gamma);
 	return albedo;
 }

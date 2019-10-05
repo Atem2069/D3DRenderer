@@ -22,8 +22,8 @@ bool D3D::init(int width, int height, HWND hwnd, int MSAALevels, int& MSAAQualit
 
 	//Swapchain desc telling d3d it renders to the given HWND
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
-	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.Width = width;
 	swapChainDesc.BufferDesc.Height = height;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 60;
@@ -34,7 +34,7 @@ bool D3D::init(int width, int height, HWND hwnd, int MSAALevels, int& MSAAQualit
 	swapChainDesc.OutputWindow = hwnd;
 	swapChainDesc.SampleDesc.Count = MSAALevels;
 	swapChainDesc.SampleDesc.Quality = MSAAQuality;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDesc.Windowed = TRUE;
 
 
