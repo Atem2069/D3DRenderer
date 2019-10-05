@@ -53,3 +53,16 @@ private:
 	UINT m_offset = 0;
 	bool requiresUpdate = false;
 };
+
+class FullscreenQuad	//I'm lazy so implementing this myself.
+{
+public:
+	bool init();
+	void destroy();
+
+	void draw();
+private:
+	ID3D11Buffer* m_baseVBO, *m_baseIBO;
+	UINT m_stride = sizeof(Vertex);
+	UINT m_offset = 0;
+};

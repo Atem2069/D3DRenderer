@@ -155,6 +155,7 @@ bool Object::init(std::string path)
 	std::vector<Vertex>().swap(vertices);
 	indices.clear();
 	std::vector<unsigned int>().swap(indices);
+	m_importer.FreeScene();
 	return true;
 }
 
@@ -216,4 +217,80 @@ XMFLOAT4 Object::getCentre()
 	XMVECTOR tmpCentre = XMVector4Transform(XMVectorSet(0, 0, 0, 1), m_transformation.model);
 	XMStoreFloat4(&centre, tmpCentre);
 	return centre;
+}
+
+/*Fullscreen quad*/
+
+bool FullscreenQuad::init()
+{
+	HRESULT result;
+	Vertex vertices[4];
+	unsigned int indices[6] = { 0,1,2,2,3,0 };	//All stack allocated.
+
+	vertices[0].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[0].uv = XMFLOAT2(1.0f, 1.0f);
+
+	vertices[1].position = XMFLOAT3(1.0f, 1.0f, 0.0f);
+	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[1].uv = XMFLOAT2(1.0f, 0.0f);
+
+	vertices[2].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);
+	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[2].uv = XMFLOAT2(0.0f, 0.0f);
+
+	vertices[3].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	vertices[3].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	vertices[3].uv = XMFLOAT2(0.0f, 1.0f);
+
+	D3D11_BUFFER_DESC vboDesc = {};
+	D3D11_BUFFER_DESC iboDesc = {};
+	D3D11_SUBRESOURCE_DATA vboData = {};
+	D3D11_SUBRESOURCE_DATA iboData = {};
+
+	vboDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vboDesc.ByteWidth = 4 * sizeof(Vertex);
+	vboDesc.CPUAccessFlags = 0;
+	vboDesc.MiscFlags = 0;
+	vboDesc.StructureByteStride = 0;
+	vboDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	vboData.pSysMem = vertices;
+
+	iboDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	iboDesc.ByteWidth = 6 * sizeof(unsigned int);
+	iboDesc.CPUAccessFlags = 0;
+	iboDesc.MiscFlags = 0;
+	iboDesc.StructureByteStride = 0;
+	iboDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	iboData.pSysMem = indices;
+
+	result = D3DContext::getCurrent()->getDevice()->CreateBuffer(&vboDesc, &vboData, &m_baseVBO);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create vertex buffer.. HRESULT " << result << std::endl;
+		return false;
+	}
+
+	result = D3DContext::getCurrent()->getDevice()->CreateBuffer(&iboDesc, &iboData, &m_baseIBO);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create index buffer.. HRESULT " << result << std::endl;
+		return false;
+	}
+	return true;
+}
+
+void FullscreenQuad::destroy()
+{
+	m_baseVBO->Release();
+	m_baseIBO->Release();
+}
+
+void FullscreenQuad::draw()
+{
+	D3DContext::getCurrent()->getDeviceContext()->IASetVertexBuffers(0, 1, &m_baseVBO, &m_stride, &m_offset);
+	D3DContext::getCurrent()->getDeviceContext()->IASetIndexBuffer(m_baseIBO, DXGI_FORMAT_R32_UINT, 0);	//32 bit unsigned int
+	D3DContext::getCurrent()->getDeviceContext()->DrawIndexed(6, 0, 0);
 }
