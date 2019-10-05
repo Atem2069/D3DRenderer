@@ -16,7 +16,7 @@ struct Vertex
 class D3D
 {
 public:
-	bool init(int width, int height, HWND hwnd, int MSAALevels, int& MSAAQuality);
+	bool init(int width, int height, bool fullscreen, HWND hwnd, int MSAALevels, int& MSAAQuality);
 	
 	ID3D11Device* getDevice();
 	ID3D11DeviceContext* getDeviceContext();

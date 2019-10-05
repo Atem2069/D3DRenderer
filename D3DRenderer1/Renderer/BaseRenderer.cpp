@@ -1,6 +1,6 @@
 #include "BaseRenderer.h"
 
-bool D3D::init(int width, int height, HWND hwnd, int MSAALevels, int& MSAAQuality)
+bool D3D::init(int width, int height, bool fullscreen, HWND hwnd, int MSAALevels, int& MSAAQuality)
 {
 	HRESULT result;	//Stores result for each operation
 
@@ -35,7 +35,7 @@ bool D3D::init(int width, int height, HWND hwnd, int MSAALevels, int& MSAAQualit
 	swapChainDesc.SampleDesc.Count = MSAALevels;
 	swapChainDesc.SampleDesc.Quality = MSAAQuality;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.Windowed = TRUE;
+	swapChainDesc.Windowed = !fullscreen;
 
 
 	//Could use IDXGIFactory2::CreateSwapChainForHwnd but then fuckery is required to get MSAA
