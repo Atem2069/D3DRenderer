@@ -227,21 +227,21 @@ bool FullscreenQuad::init()
 	Vertex vertices[4];
 	unsigned int indices[6] = { 0,1,2,2,3,0 };	//All stack allocated.
 
-	vertices[0].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
 	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	vertices[0].uv = XMFLOAT2(1.0f, 1.0f);
+	vertices[0].uv = XMFLOAT2(0.0f, 1.0f);
 
-	vertices[1].position = XMFLOAT3(1.0f, 1.0f, 0.0f);
+	vertices[1].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);
 	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	vertices[1].uv = XMFLOAT2(1.0f, 0.0f);
+	vertices[1].uv = XMFLOAT2(0.0f, 0.0f);
 
-	vertices[2].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);
+	vertices[2].position = XMFLOAT3(1.0f, 1.0f, 0.0f);
 	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	vertices[2].uv = XMFLOAT2(0.0f, 0.0f);
+	vertices[2].uv = XMFLOAT2(1.0f, 0.0f);
 
-	vertices[3].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	vertices[3].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
 	vertices[3].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	vertices[3].uv = XMFLOAT2(0.0f, 1.0f);
+	vertices[3].uv = XMFLOAT2(1.0f, 1.0f);
 
 	D3D11_BUFFER_DESC vboDesc = {};
 	D3D11_BUFFER_DESC iboDesc = {};

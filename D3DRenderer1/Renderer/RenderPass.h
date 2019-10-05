@@ -15,7 +15,10 @@ public:
 
 	void specifyRenderTarget(ID3D11RenderTargetView* newRenderTargetView);
 
-	void begin(VertexShader& vs, PixelShader& ps, float r, float g, float b);
+	void begin(float r, float g, float b);
+
+	void bindRenderTargetSRV(int bindingPoint, int samplerBindingPoint);
+	void unbindRenderTargetSRV(int bindingPoint);
 
 	ID3D11RenderTargetView* getRenderTargetView();
 	ID3D11DepthStencilView* getDepthStencilView();

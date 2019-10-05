@@ -32,7 +32,7 @@ bool RenderPass::init(int width, int height, int renderPassType, int MSAALevels,
 	//RTV/DSV descriptors
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 	rtvDesc.Texture2D.MipSlice = 0;
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
@@ -118,15 +118,25 @@ void RenderPass::specifyRenderTarget(ID3D11RenderTargetView* newRenderTargetView
 	m_renderPassType = RENDERPASS_SWAPCHAINBUF;	//Render pass type now switched from separate renderbuffer to swapchain buffer. this enum can signal to getters and warn if an item which is not meant to exist is being called upon.
 }
 
-void RenderPass::begin(VertexShader& vs, PixelShader& ps, float r, float g, float b)
+void RenderPass::begin(float r, float g, float b)
 {
 	D3DContext::getCurrent()->getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	float clr[4] = { r,g,b,1.0f };
 	D3DContext::getCurrent()->getDeviceContext()->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);	//1 rtv for now, no deferred
 	D3DContext::getCurrent()->getDeviceContext()->ClearRenderTargetView(m_renderTargetView, clr);
 	D3DContext::getCurrent()->getDeviceContext()->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);	//0 on stencil test not used
-	vs.bind();
-	ps.bind();
+}
+
+void RenderPass::bindRenderTargetSRV(int bindingPoint, int samplerBindingPoint)
+{
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(bindingPoint, 1, &m_renderBufferView);
+	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(samplerBindingPoint, 1, &D3DContext::m_samplerStateNearestNoMips);
+}
+
+void RenderPass::unbindRenderTargetSRV(int bindingPoint)
+{
+	ID3D11ShaderResourceView* m_blank = nullptr;
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(bindingPoint, 1, &m_blank);	//This is somehow the way to unbind resources in direct3d 11...
 }
 
 ID3D11RenderTargetView* RenderPass::getRenderTargetView() { return m_renderTargetView; }

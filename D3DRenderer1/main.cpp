@@ -94,6 +94,9 @@ int main()
 	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF,MultisampleLevel,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
 		return -1;
 	m_renderPass.specifyRenderTarget(D3DContext::getCurrent()->getBackBuffer());	//Change render target to hardware render target
+	RenderPass m_deferredRenderPass;
+	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, MultisampleLevel, MultisampleQuality))
+		return -1;
 
 
 	DirectionalLight m_basicLight;
@@ -107,6 +110,19 @@ int main()
 	DirectionalShadowMap m_shadowMap;
 	if (!m_shadowMap.init(4096,4096, 4096,4096, m_basicLight))
 		return -1;
+
+	
+	//Deferred quad stuff for testing
+	FullscreenQuad m_fsQuad;
+	if (!m_fsQuad.init())
+		return -1;
+	VertexShader m_qVertexShader;
+	if (!m_qVertexShader.init(R"(Shaders\DeferredQuad\vertexShader.hlsl)"))
+		return -1;
+	PixelShader m_qPixelShader;
+	if (!m_qPixelShader.init(R"(Shaders\DeferredQuad\pixelShader.hlsl)"))
+		return -1;
+
 
 	//For camera
 	float pitch = 0, yaw = 0;
@@ -144,8 +160,10 @@ int main()
 
 		D3DContext::setViewport(WIDTH, HEIGHT);
 		//Hardware render pass. initial
-		m_renderPass.begin(m_vertexShader, m_pixelShader, 0.564f, 0.8f, 0.976f);
-
+		//m_renderPass.begin(0.564f, 0.8f, 0.976f);
+		m_deferredRenderPass.begin(0.564f, 0.8f, 0.976f);
+		m_vertexShader.bind();
+		m_pixelShader.bind();
 		//CPU Updating
 		m_camera.update();
 		m_camera.bind(0);
@@ -157,6 +175,13 @@ int main()
 		m_object2.draw();
 		m_object3.draw();
 		m_shadowMap.unbindDepthTexturePS(1);
+
+		m_renderPass.begin(1.0f, 1.0f, 1.0f);
+		m_qVertexShader.bind();
+		m_qPixelShader.bind();
+		m_deferredRenderPass.bindRenderTargetSRV(0, 0);
+		m_fsQuad.draw();
+		m_deferredRenderPass.unbindRenderTargetSRV(0);	//Necessary to stop undefined behaviour
 
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
