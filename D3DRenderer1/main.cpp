@@ -82,7 +82,7 @@ int main()
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
 	m_object2.scale(XMVectorSet(10, 10, 10, 10));
 	m_object2.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
-	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 1.0f));
+	m_object2.translate(XMVectorSet(0.0f, 10.5f, 0.0f, 1.0f));
 	Object m_object3;
 	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
 	m_object3.scale(XMVectorSet(10, 10, 10, 10));
@@ -105,7 +105,7 @@ int main()
 		return -1;
 
 	DirectionalShadowMap m_shadowMap;
-	if (!m_shadowMap.init(4096,4096, 2048,2048, m_basicLight))
+	if (!m_shadowMap.init(4096,4096, 4096,4096, m_basicLight))
 		return -1;
 
 	//For camera
@@ -185,13 +185,13 @@ int main()
 		if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 			m_camera.cameraChangeInfo.position -= m_camera.cameraChangeInfo.up * deltaTime * cameraSpeed;
 		if (glfwGetKey(m_window, GLFW_KEY_LEFT) == GLFW_PRESS)
-			yaw += 0.5f * deltaTime * cameraSpeed;
+			yaw += 0.5f * deltaTime * 250.0f;
 		if (glfwGetKey(m_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-			yaw -= 0.5f * deltaTime * cameraSpeed;
+			yaw -= 0.5f * deltaTime * 250.0f;
 		if (glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
-			pitch += 0.5f * deltaTime * cameraSpeed;
+			pitch += 0.5f * deltaTime * 250.0f;
 		if (glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-			pitch -= 0.5f * deltaTime * cameraSpeed;
+			pitch -= 0.5f * deltaTime * 250.0f;
 		deltaTime = newTime - oldTime;
 		oldTime = newTime;
 		newTime = glfwGetTime();

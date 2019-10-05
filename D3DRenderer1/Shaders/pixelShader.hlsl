@@ -25,6 +25,8 @@ SamplerState samplerState : register(s0);
 Texture2D shadowTex : register(t1);
 SamplerComparisonState shadowSampler : register(s1);
 
+#define BIAS 0.00006
+
 float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir)
 {
 	float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -34,7 +36,7 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 
 	float currentDepth = projCoords.z;
 
-	float bias = max(0.005f * (1.0 - dot(normal, lightDir)), 0.0005f);
+	float bias = max((BIAS*10) * (1.0 - dot(normal, lightDir)), BIAS);
 
 	float shadow = 0.0;
 	float2 texelSize;
@@ -60,19 +62,19 @@ float4 main(VS_OUT input) : SV_TARGET
 	float avgTexColor = (texColor.r + texColor.g + texColor.b + texColor.a) / 4.0;
 	texColor = (avgTexColor == 0) ? 1.0f : texColor;
 
-	float3 ambient = 0.1f * light.color.xyz;
+	float3 ambient = 0.3f * light.color.xyz;
 
 	float3 lightDir = normalize(-light.direction.xyz);
 	float3 norm = normalize(input.normal.xyz);
 
-	float diffuseIntensity = 1.0f;
+	float diffuseIntensity = 5.0f;
 	float diff = max(dot(norm, lightDir), 0.0f) * diffuseIntensity;
 	float3 diffuse = light.color.xyz * diff;
 
 	float3 viewDir = normalize(input.campos - input.fragpos);
 	float3 halfwayDir = normalize(lightDir + viewDir);
 
-	float specularIntensity = 1.0f;
+	float specularIntensity = 5.0f;
 	float spec = pow(max(dot(norm, halfwayDir), 0.0f), 64.0f) * specularIntensity;
 	float3 specular = light.color.xyz * spec;
 

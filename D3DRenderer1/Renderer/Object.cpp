@@ -151,6 +151,10 @@ bool Object::init(std::string path)
 		return false;
 	}
 
+	vertices.clear();
+	std::vector<Vertex>().swap(vertices);
+	indices.clear();
+	std::vector<unsigned int>().swap(indices);
 	return true;
 }
 
