@@ -75,6 +75,9 @@
     <ClCompile Include="..\extlib\imgui-master\imgui_impl_glfw.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\DeferredRenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer\BaseRenderer.h">

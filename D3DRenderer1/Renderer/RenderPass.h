@@ -1,5 +1,6 @@
 #pragma once
-
+#include <iostream>
+#include <vector>
 #include "BaseRenderer.h"
 #include "VertexShader.h"
 #include "PixelShader.h"
@@ -32,4 +33,29 @@ private:
 	ID3D11DepthStencilView* m_depthStencilView;
 	ID3D11ShaderResourceView* m_depthBufferView;
 	int m_renderPassType;
+};
+
+class DeferredRenderPass
+{
+public:
+	bool init(int width, int height, int noRenderTargets, int MSAALevels, int MSAAQuality);
+	void destroy();
+
+	void begin(float r, float g, float b);
+
+	void bindRenderTargets(int startLocation);
+	void unbindRenderTargets(int startLocation);
+
+	std::vector<ID3D11ShaderResourceView*> getRenderBufferViews();
+	ID3D11ShaderResourceView* getDepthBufferView();
+private:
+	std::vector<ID3D11Texture2D*> m_renderBuffers;
+	std::vector<ID3D11RenderTargetView*> m_renderTargetViews;
+	std::vector<ID3D11ShaderResourceView*> m_renderBufferViews;
+
+	ID3D11Texture2D* m_depthBuffer;
+	ID3D11DepthStencilView* m_depthStencilView;
+	ID3D11ShaderResourceView* m_depthBufferView;
+
+	int m_noRenderTargets;
 };

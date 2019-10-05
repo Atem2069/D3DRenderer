@@ -133,6 +133,7 @@
     <ClCompile Include="Renderer\BaseRenderer.cpp" />
     <ClCompile Include="Renderer\Camera.cpp" />
     <ClCompile Include="Renderer\ConstantBuffer.cpp" />
+    <ClCompile Include="Renderer\DeferredRenderPass.cpp" />
     <ClCompile Include="Renderer\Object.cpp" />
     <ClCompile Include="Renderer\PixelShader.cpp" />
     <ClCompile Include="Renderer\RenderPass.cpp" />

@@ -178,6 +178,9 @@ int main()
 		m_object3.draw();
 		m_shadowMap.unbindDepthTexturePS(1);
 
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
 		m_renderPass.begin(1.0f, 1.0f, 1.0f);
 		m_qVertexShader.bind();
 		m_qPixelShader.bind();
@@ -185,8 +188,6 @@ int main()
 		m_fsQuad.draw();
 		m_deferredRenderPass.unbindRenderTargetSRV(0);	//Necessary to stop undefined behaviour
 
-		ImGui::Render();
-		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 		if (!D3DContext::present(doVsync))
 			glfwSetWindowShouldClose(m_window, GLFW_TRUE);	//quit if device removed otherwise everything breaks 
