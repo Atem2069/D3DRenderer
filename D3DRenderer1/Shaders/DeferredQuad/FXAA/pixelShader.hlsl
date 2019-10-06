@@ -14,8 +14,8 @@ cbuffer PerFrameFlags : register(b1)
 
 float4 FXAA(VS_OUT input)
 {
-	float FXAA_SPAN_MAX = 16.0;
-	float FXAA_REDUCE_MUL = 1.0 / 16.0;
+	float FXAA_SPAN_MAX = 8.0;
+	float FXAA_REDUCE_MUL = 1.0 / 8.0;
 	float FXAA_REDUCE_MIN = 1.0 / 128.0;
 
 	float3 rgbNW = inputTex.Sample(samplerState, input.texcoord + (float2(-1.0, -1.0) / float2(1600, 900))).xyz;

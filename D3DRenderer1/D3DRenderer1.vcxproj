@@ -130,6 +130,7 @@
     <ClCompile Include="..\extlib\imgui-master\imgui_impl_glfw.cpp" />
     <ClCompile Include="..\extlib\imgui-master\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Renderer\AmbientOcclusion.cpp" />
     <ClCompile Include="Renderer\BaseRenderer.cpp" />
     <ClCompile Include="Renderer\Camera.cpp" />
     <ClCompile Include="Renderer\ConstantBuffer.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="..\extlib\imgui-master\imstb_rectpack.h" />
     <ClInclude Include="..\extlib\imgui-master\imstb_textedit.h" />
     <ClInclude Include="..\extlib\imgui-master\imstb_truetype.h" />
+    <ClInclude Include="Renderer\AmbientOcclusion.h" />
     <ClInclude Include="Renderer\BaseRenderer.h" />
     <ClInclude Include="Renderer\Camera.h" />
     <ClInclude Include="Renderer\ConstantBuffer.h" />
