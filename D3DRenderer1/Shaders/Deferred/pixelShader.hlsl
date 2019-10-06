@@ -19,6 +19,7 @@ struct PS_OUT
 cbuffer PerFrameFlags : register(b1)
 {
 	int doFXAA;
+	int doSSAO;
 };
 
 Texture2D albedoTex : register(t0);

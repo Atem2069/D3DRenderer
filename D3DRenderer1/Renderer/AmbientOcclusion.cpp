@@ -63,7 +63,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 	noiseTexDesc.ArraySize = 1;
 	noiseTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	noiseTexDesc.CPUAccessFlags = 0;
-	noiseTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	noiseTexDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	noiseTexDesc.Width = 4;
 	noiseTexDesc.Height = 4;
 	noiseTexDesc.MipLevels = 1;
@@ -84,6 +84,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 	D3D11_SHADER_RESOURCE_VIEW_DESC noiseTexView = {};
 	noiseTexView.Format = noiseTexDesc.Format;
 	noiseTexView.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	noiseTexView.Texture2D.MipLevels = 1;
 
 	result = D3DContext::getCurrent()->getDevice()->CreateShaderResourceView(noiseTexture, &noiseTexView, &noiseTextureView);
 	if (FAILED(result))
@@ -97,6 +98,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 	noiseSamplerViewDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	noiseSamplerViewDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	noiseSamplerViewDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	
 	
 	result = D3DContext::getCurrent()->getDevice()->CreateSamplerState(&noiseSamplerViewDesc, &noiseSamplerState);
 	if (FAILED(result))
@@ -117,15 +119,19 @@ void AmbientOcclusionPass::destroy()
 	//todo
 }
 
-void AmbientOcclusionPass::renderAO()
+void AmbientOcclusionPass::begin()
 {
 	m_AORenderPass.begin(1, 1, 1, 0);
 	m_AOVertexShader.bind();
 	m_AOPixelShader.bind();
+}
+
+void AmbientOcclusionPass::renderAO()
+{
 
 	m_KernelConstBuffer.uploadToPixelShader(2);	//Hardcoded for now just so it can work
 	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(1, 1, &noiseSamplerState);
-	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(1, 1, &noiseTextureView);
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(4, 1, &noiseTextureView);
 	m_fsQuad.draw();
 
 	m_AOFinalRenderPass.begin(1, 1, 1, 0);
@@ -138,10 +144,15 @@ void AmbientOcclusionPass::renderAO()
 
 void AmbientOcclusionPass::bindAOTexture(int samplerStateBinding, int textureBindingPoint)
 {
-	m_AOFinalRenderPass.bindRenderTargetSRV(samplerStateBinding, textureBindingPoint);
+	m_AOFinalRenderPass.bindRenderTargetSRV(textureBindingPoint,samplerStateBinding);
 }
 
 void AmbientOcclusionPass::unbindAOTexture(int textureBindingPoint)
 {
 	m_AOFinalRenderPass.unbindRenderTargetSRV(textureBindingPoint);
+}
+
+ID3D11ShaderResourceView* AmbientOcclusionPass::getAOTexture()
+{
+	return m_AOFinalRenderPass.getRenderBufferView();
 }

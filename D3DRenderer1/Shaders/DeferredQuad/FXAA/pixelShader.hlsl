@@ -10,6 +10,7 @@ Texture2D inputTex : register(t0);
 cbuffer PerFrameFlags : register(b1)
 {
 	int doFXAA;
+	int doSSAO;
 }
 
 float4 FXAA(VS_OUT input)

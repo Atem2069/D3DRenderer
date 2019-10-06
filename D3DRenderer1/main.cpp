@@ -15,6 +15,7 @@
 #include "Renderer/Light.h"
 #include "Renderer/ConstantBuffer.h"
 #include "Renderer/ShadowMapping.h"
+#include "Renderer/AmbientOcclusion.h"
 
 //ImGui
 #include <imgui.h>
@@ -34,7 +35,8 @@ int MultisampleQuality = 0;
 struct FrameFlags
 {
 	int doFXAA;
-	int m_unusedAlignment[3];
+	int doSSAO;
+	int m_unusedAlignment[2];
 };
 
 int main()
@@ -147,9 +149,14 @@ int main()
 
 	FrameFlags m_frameFlags = {};
 	m_frameFlags.doFXAA = 1;
+	m_frameFlags.doSSAO = 1;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
+
+	AmbientOcclusionPass m_ambientOcclusionPass;
+	m_ambientOcclusionPass.init(WIDTH, HEIGHT);
+	
 
 	//For camera
 	float pitch = 0, yaw = 0;
@@ -177,6 +184,7 @@ int main()
 			ImGui::DragFloat3("Light LookAt", (float*)&m_basicLight.direction);
 			ImGui::Text("Position: X %.2f Y %.2f Z %.2f",temp.x,temp.y,temp.z);
 			ImGui::Checkbox("FXAA Enable", (bool*)&m_frameFlags.doFXAA);
+			ImGui::Checkbox("SSAO Enable", (bool*)&m_frameFlags.doSSAO);
 			ImGui::Image((ImTextureID)m_shadowMap.getDepthBufferView(), ImVec2(256, 256));
 		}
 		ImGui::End();
@@ -185,6 +193,7 @@ int main()
 		{
 			for (int i = 0; i < m_deferredRenderPass.m_noRenderTargets; i++)
 				ImGui::Image((ImTextureID)m_deferredRenderPass.getRenderBufferViews()[i], ImVec2(320, 180));
+			ImGui::Image((ImTextureID)m_ambientOcclusionPass.getAOTexture(), ImVec2(320, 180));
 		}
 		ImGui::End();
 
@@ -212,17 +221,23 @@ int main()
 		m_object2.draw();
 		m_object3.draw();
 
+		//SSAO Pass just after GPU drawing
+		m_ambientOcclusionPass.begin();
+		m_deferredRenderPass.bindRenderTargets(0, 0);
+		m_ambientOcclusionPass.renderAO();
+
 		//Drawing quad to combine deferred targets and get result
 
 		m_deferredResolvePass.begin(0.564f,0.8f,0.976f, 1.0f);
 		m_qVertexShader.bind();
 		m_qPixelShader.bind();
-
-		m_shadowMap.bindDepthTexturePS(1, 4);
+		m_ambientOcclusionPass.bindAOTexture(0, 5);
 		m_deferredRenderPass.bindRenderTargets(0, 0);
+		m_shadowMap.bindDepthTexturePS(1, 4);
 		m_fsQuad.draw();
 		m_shadowMap.unbindDepthTexturePS(4);
 		m_deferredRenderPass.unbindRenderTargets(0);	//Necessary to stop undefined behaviour
+		m_ambientOcclusionPass.unbindAOTexture(5);
 
 		//Drawing another quad for FXAA pass
 

@@ -17,10 +17,13 @@ public:
 	bool init(float width, float height);
 	void destroy();
 
+	void begin();
 	void renderAO();
 
 	void bindAOTexture(int samplerStateBinding, int textureBindingPoint);
 	void unbindAOTexture(int textureBindingPoint);
+
+	ID3D11ShaderResourceView* getAOTexture();
 private:
 	std::vector<XMFLOAT4> m_ssaoKernels;
 

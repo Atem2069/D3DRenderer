@@ -1,9 +1,10 @@
 
 SamplerState samplerState : register(s0);
-Texture2DMS<float4> albedoTex : register(t0);
-Texture2DMS<float4> fragposTex : register(t1);
-Texture2DMS<float4> fragposlightspaceTex : register(t2);
-Texture2DMS<float4> normalTex : register(t3);
+Texture2D albedoTex : register(t0);
+Texture2D fragposTex : register(t1);
+Texture2D fragposlightspaceTex : register(t2);
+Texture2D normalTex : register(t3);
+Texture2D AOTexture : register(t5);
 
 Texture2D shadowTex : register(t4);
 SamplerComparisonState shadowSampler : register(s1);
@@ -25,6 +26,12 @@ cbuffer LightInformation : register(b0)
 {
 	DirectionalLight light;
 }
+
+cbuffer PerFrameFlags : register(b1)
+{
+	int doFXAA;
+	int doSSAO;
+};
 
 float4 MSAAResolve(Texture2DMS<float4> inputTexture, int numSamples, uint2 pixelTexCoords)
 {
@@ -69,17 +76,25 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 float4 main(VS_OUT input) : SV_TARGET0
 {
 
-	uint3 newTexCoords;
-	albedoTex.GetDimensions(newTexCoords.x, newTexCoords.y, newTexCoords.z);	//MSAA levels and texture dimensions are most likely the same otherwise something's gone wrong, so they're re-used.
-	newTexCoords.x = input.texcoord.x * newTexCoords.x;
-	newTexCoords.y = input.texcoord.y * newTexCoords.y;
+	//uint3 newTexCoords;
+	//albedoTex.GetDimensions(newTexCoords.x, newTexCoords.y, newTexCoords.z);	//MSAA levels and texture dimensions are most likely the same otherwise something's gone wrong, so they're re-used.
+	//newTexCoords.x = input.texcoord.x * newTexCoords.x;
+	//newTexCoords.y = input.texcoord.y * newTexCoords.y;
 	
-	float4 albedo = MSAAResolve(albedoTex, newTexCoords.z, newTexCoords.xy);
-	float4 fragpos = MSAAResolve(fragposTex, newTexCoords.z, newTexCoords.xy);
-	float4 fragposlightspace = MSAAResolve(fragposlightspaceTex, newTexCoords.z, newTexCoords.xy);
-	float4 normal = MSAAResolve(normalTex, newTexCoords.z, newTexCoords.xy);
+	////float4 albedo = MSAAResolve(albedoTex, newTexCoords.z, newTexCoords.xy);
+	//float4 fragpos = MSAAResolve(fragposTex, newTexCoords.z, newTexCoords.xy);
+	//float4 fragposlightspace = MSAAResolve(fragposlightspaceTex, newTexCoords.z, newTexCoords.xy);
+	//float4 normal = MSAAResolve(normalTex, newTexCoords.z, newTexCoords.xy);
+	float4 albedo = albedoTex.Sample(samplerState, input.texcoord);
+	float4 fragpos = fragposTex.Sample(samplerState, input.texcoord);
+	float4 fragposlightspace = fragposlightspaceTex.Sample(samplerState, input.texcoord);
+	float4 normal = normalTex.Sample(samplerState, input.texcoord);
+	float3 AOFactor = AOTexture.Sample(samplerState, input.texcoord).rgb;
 
-	float3 ambient = 0.3f * light.color.xyz;
+	if (!doSSAO)
+		AOFactor = 1.0f;
+
+	float3 ambient = 0.3f * light.color.xyz * AOFactor;
 
 	float3 lightDir = normalize(-light.direction.xyz);
 	float3 norm = normal.xyz;

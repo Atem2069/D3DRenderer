@@ -31,6 +31,9 @@
     <Filter Include="Shaders\Deferred Quad\FXAA">
       <UniqueIdentifier>{0cc07b84-dec6-4134-a00f-438b1f40b8e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Deferred\SSAO">
+      <UniqueIdentifier>{1dac6e6a-e978-4a25-8c56-16f925c28e0a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -177,6 +180,18 @@
     </FxCompile>
     <FxCompile Include="Shaders\DeferredQuad\FXAA\pixelShader.hlsl">
       <Filter>Shaders\Deferred Quad\FXAA</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Deferred\SSAO\blurPixelShader.hlsl">
+      <Filter>Shaders\Deferred\SSAO</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Deferred\SSAO\blurVertexShader.hlsl">
+      <Filter>Shaders\Deferred\SSAO</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Deferred\SSAO\pixelShader.hlsl">
+      <Filter>Shaders\Deferred\SSAO</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Deferred\SSAO\vertexShader.hlsl">
+      <Filter>Shaders\Deferred\SSAO</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
