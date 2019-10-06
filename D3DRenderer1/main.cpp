@@ -31,6 +31,12 @@ bool doVsync = false;
 int MultisampleLevel = 1;
 int MultisampleQuality = 0;
 
+struct FrameFlags
+{
+	int doFXAA;
+	int m_unusedAlignment[3];
+};
+
 int main()
 {
 	if (!glfwInit())
@@ -96,8 +102,15 @@ int main()
 	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF,1,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
 		return -1;
 	m_renderPass.specifyRenderTarget(D3DContext::getCurrent()->getBackBuffer());	//Change render target to hardware render target
+
+	RenderPass m_deferredResolvePass;
+	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, 1, MultisampleQuality))
+		return -1;
+
+	DXGI_FORMAT formats[4] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT };
+
 	DeferredRenderPass m_deferredRenderPass;
-	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, 4, MultisampleLevel,MultisampleQuality))
+	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, 4, formats, MultisampleLevel,MultisampleQuality))
 		return -1;
 
 
@@ -125,6 +138,18 @@ int main()
 	if (!m_qPixelShader.init(R"(Shaders\DeferredQuad\pixelShader.hlsl)"))
 		return -1;
 
+	VertexShader m_fxaaVertexShader;
+	if (!m_fxaaVertexShader.init(R"(Shaders\DeferredQuad\FXAA\vertexShader.hlsl)"))
+		return -1;
+	PixelShader m_fxaaPixelShader;
+	if (!m_fxaaPixelShader.init(R"(Shaders\DeferredQuad\FXAA\pixelShader.hlsl)"))
+		return -1;
+
+	FrameFlags m_frameFlags = {};
+	m_frameFlags.doFXAA = 1;
+	ConstantBuffer m_flagsBuffer;
+	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
+		return -1;
 
 	//For camera
 	float pitch = 0, yaw = 0;
@@ -137,6 +162,7 @@ int main()
 	//These are set before because binds per-frame is TERRIBLE for performance.
 	m_lightUploadBuffer.uploadToPixelShader(0);
 	m_shadowMap.bindShadowCamera(2);
+	m_flagsBuffer.uploadToPixelShader(1);
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glfwPollEvents();
@@ -150,7 +176,15 @@ int main()
 			XMStoreFloat4(&temp, m_camera.cameraChangeInfo.position);
 			ImGui::DragFloat3("Light LookAt", (float*)&m_basicLight.direction);
 			ImGui::Text("Position: X %.2f Y %.2f Z %.2f",temp.x,temp.y,temp.z);
+			ImGui::Checkbox("FXAA Enable", (bool*)&m_frameFlags.doFXAA);
 			ImGui::Image((ImTextureID)m_shadowMap.getDepthBufferView(), ImVec2(256, 256));
+		}
+		ImGui::End();
+
+		ImGui::Begin("Deferred Renderer Debug");
+		{
+			for (int i = 0; i < m_deferredRenderPass.m_noRenderTargets; i++)
+				ImGui::Image((ImTextureID)m_deferredRenderPass.getRenderBufferViews()[i], ImVec2(320, 180));
 		}
 		ImGui::End();
 
@@ -163,13 +197,14 @@ int main()
 		D3DContext::setViewport(WIDTH, HEIGHT);
 		//Hardware render pass. initial
 		//m_renderPass.begin(0.564f, 0.8f, 0.976f);
-		m_deferredRenderPass.begin(0.564f, 0.8f, 0.976f);
+		m_deferredRenderPass.begin(0.564f, 0.8f, 0.976f, 0.0f);
 		m_vertexShader.bind();
 		m_pixelShader.bind();
 		//CPU Updating
 		m_camera.update();
 		m_camera.bind(0);
 		m_lightUploadBuffer.update((void*)&m_basicLight, sizeof(DirectionalLight));
+		m_flagsBuffer.update((void*)&m_frameFlags, sizeof(FrameFlags));
 
 
 		//GPU Drawing
@@ -177,7 +212,9 @@ int main()
 		m_object2.draw();
 		m_object3.draw();
 
-		m_renderPass.begin(1.0f, 1.0f, 1.0f);
+		//Drawing quad to combine deferred targets and get result
+
+		m_deferredResolvePass.begin(0.564f,0.8f,0.976f, 1.0f);
 		m_qVertexShader.bind();
 		m_qPixelShader.bind();
 
@@ -186,6 +223,17 @@ int main()
 		m_fsQuad.draw();
 		m_shadowMap.unbindDepthTexturePS(4);
 		m_deferredRenderPass.unbindRenderTargets(0);	//Necessary to stop undefined behaviour
+
+		//Drawing another quad for FXAA pass
+
+		m_renderPass.begin(1.0f, 1.0f, 1.0f, 1.0f);
+		m_fxaaVertexShader.bind();
+		m_fxaaPixelShader.bind();
+
+		m_deferredResolvePass.bindRenderTargetSRV(0, 0);
+		m_fsQuad.draw();
+		m_deferredResolvePass.unbindRenderTargetSRV(0);
+
 
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

@@ -16,7 +16,7 @@ public:
 
 	void specifyRenderTarget(ID3D11RenderTargetView* newRenderTargetView);
 
-	void begin(float r, float g, float b);
+	void begin(float r, float g, float b, float a);
 
 	void bindRenderTargetSRV(int bindingPoint, int samplerBindingPoint);
 	void unbindRenderTargetSRV(int bindingPoint);
@@ -38,16 +38,17 @@ private:
 class DeferredRenderPass
 {
 public:
-	bool init(int width, int height, int noRenderTargets, int MSAALevels, int MSAAQuality);
+	bool init(int width, int height, int noRenderTargets, DXGI_FORMAT* formats, int MSAALevels, int MSAAQuality);
 	void destroy();
 
-	void begin(float r, float g, float b);
+	void begin(float r, float g, float b, float a);
 
 	void bindRenderTargets(int startLocation, int samplerBinding);
 	void unbindRenderTargets(int startLocation);
 
 	std::vector<ID3D11ShaderResourceView*> getRenderBufferViews();
 	ID3D11ShaderResourceView* getDepthBufferView();
+	int m_noRenderTargets;
 private:
 	std::vector<ID3D11Texture2D*> m_renderBuffers;
 	std::vector<ID3D11RenderTargetView*> m_renderTargetViews;
@@ -57,5 +58,4 @@ private:
 	ID3D11DepthStencilView* m_depthStencilView;
 	ID3D11ShaderResourceView* m_depthBufferView;
 
-	int m_noRenderTargets;
 };

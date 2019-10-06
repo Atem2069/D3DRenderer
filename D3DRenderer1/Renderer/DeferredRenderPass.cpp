@@ -1,6 +1,6 @@
 #include "RenderPass.h"
 
-bool DeferredRenderPass::init(int width, int height, int noRenderTargets, int MSAALevels, int MSAAQuality)
+bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FORMAT* formats, int MSAALevels, int MSAAQuality)
 {
 	HRESULT result;
 	m_renderBuffers.resize(noRenderTargets);
@@ -14,7 +14,7 @@ bool DeferredRenderPass::init(int width, int height, int noRenderTargets, int MS
 		backBufferDesc.ArraySize = 1;
 		backBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 		backBufferDesc.CPUAccessFlags = 0;
-		backBufferDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		backBufferDesc.Format = formats[i];
 		backBufferDesc.Width = width;
 		backBufferDesc.Height = height;
 		backBufferDesc.MipLevels = 1;
@@ -106,10 +106,10 @@ void DeferredRenderPass::destroy()
 	m_depthBufferView->Release();
 }
 
-void DeferredRenderPass::begin(float r, float g, float b)
+void DeferredRenderPass::begin(float r, float g, float b, float a)
 {
 	D3DContext::getCurrent()->getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	float colors[4] = { r,g,b,1.0f };
+	float colors[4] = { r,g,b,a };
 	D3DContext::getCurrent()->getDeviceContext()->OMSetRenderTargets(m_noRenderTargets, &m_renderTargetViews[0], m_depthStencilView);
 	for (int i = 0; i < m_noRenderTargets; i++)
 		D3DContext::getCurrent()->getDeviceContext()->ClearRenderTargetView(m_renderTargetViews[i], colors);

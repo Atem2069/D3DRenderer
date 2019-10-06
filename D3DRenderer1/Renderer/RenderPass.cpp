@@ -118,7 +118,7 @@ void RenderPass::specifyRenderTarget(ID3D11RenderTargetView* newRenderTargetView
 	m_renderPassType = RENDERPASS_SWAPCHAINBUF;	//Render pass type now switched from separate renderbuffer to swapchain buffer. this enum can signal to getters and warn if an item which is not meant to exist is being called upon.
 }
 
-void RenderPass::begin(float r, float g, float b)
+void RenderPass::begin(float r, float g, float b, float a)
 {
 	D3DContext::getCurrent()->getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	float clr[4] = { r,g,b,1.0f };

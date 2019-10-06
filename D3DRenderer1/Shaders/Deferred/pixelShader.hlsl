@@ -16,6 +16,11 @@ struct PS_OUT
 	float4 normal : SV_TARGET3;
 };
 
+cbuffer PerFrameFlags : register(b1)
+{
+	int doFXAA;
+};
+
 Texture2D albedoTex : register(t0);
 SamplerState samplerState : register(s0);
 
