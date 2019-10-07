@@ -76,15 +76,6 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 float4 main(VS_OUT input) : SV_TARGET0
 {
 
-	//uint3 newTexCoords;
-	//albedoTex.GetDimensions(newTexCoords.x, newTexCoords.y, newTexCoords.z);	//MSAA levels and texture dimensions are most likely the same otherwise something's gone wrong, so they're re-used.
-	//newTexCoords.x = input.texcoord.x * newTexCoords.x;
-	//newTexCoords.y = input.texcoord.y * newTexCoords.y;
-	
-	////float4 albedo = MSAAResolve(albedoTex, newTexCoords.z, newTexCoords.xy);
-	//float4 fragpos = MSAAResolve(fragposTex, newTexCoords.z, newTexCoords.xy);
-	//float4 fragposlightspace = MSAAResolve(fragposlightspaceTex, newTexCoords.z, newTexCoords.xy);
-	//float4 normal = MSAAResolve(normalTex, newTexCoords.z, newTexCoords.xy);
 	float4 albedo = albedoTex.Sample(samplerState, input.texcoord);
 	float4 fragpos = fragposTex.Sample(samplerState, input.texcoord);
 	float4 fragposlightspace = fragposlightspaceTex.Sample(samplerState, input.texcoord);

@@ -222,16 +222,20 @@ int main()
 		m_object3.draw();
 
 		//SSAO Pass just after GPU drawing
-		m_ambientOcclusionPass.begin();
-		m_deferredRenderPass.bindRenderTargets(0, 0);
-		m_ambientOcclusionPass.renderAO();
+		if (m_frameFlags.doSSAO)
+		{
+			m_ambientOcclusionPass.begin();
+			m_deferredRenderPass.bindRenderTargets(0, 0);
+			m_ambientOcclusionPass.renderAO();
+		}
 
 		//Drawing quad to combine deferred targets and get result
 
 		m_deferredResolvePass.begin(0.564f,0.8f,0.976f, 1.0f);
 		m_qVertexShader.bind();
 		m_qPixelShader.bind();
-		m_ambientOcclusionPass.bindAOTexture(0, 5);
+		if(m_frameFlags.doSSAO)
+			m_ambientOcclusionPass.bindAOTexture(0, 5);
 		m_deferredRenderPass.bindRenderTargets(0, 0);
 		m_shadowMap.bindDepthTexturePS(1, 4);
 		m_fsQuad.draw();

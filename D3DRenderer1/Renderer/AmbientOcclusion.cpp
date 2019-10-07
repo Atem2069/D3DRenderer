@@ -18,7 +18,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 
 	std::uniform_real_distribution<float> randomFloats(0.0, 1.0);
 	std::default_random_engine generator;
-	for (unsigned int i = 0; i < 64; i++)
+	for (unsigned int i = 0; i < 32; i++)
 	{
 		XMFLOAT4 sample;
 		sample.x = randomFloats(generator) * 2.0 - 1.0;
@@ -36,7 +36,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 		sample.y *= rand;
 		sample.z *= rand;
 
-		float scale = (float)i / 64.0;
+		float scale = (float)i / 8.0;
 		scale = lerp(0.1f, 1.0f, scale * scale);
 		sample.x *= scale;
 		sample.y *= scale;
@@ -48,15 +48,14 @@ bool AmbientOcclusionPass::init(float width, float height)
 	if (!m_KernelConstBuffer.init(&m_ssaoKernels[0], m_ssaoKernels.size() * sizeof(XMFLOAT4)))
 		return false;
 
-	std::vector<XMFLOAT4> ssaoNoise;
+	std::vector<float> ssaoNoise;
 	for (unsigned int i = 0; i < 16; i++)
 	{
-		XMFLOAT4 noise;
-		noise.x = randomFloats(generator) * 2.0 - 1.0;
-		noise.y = randomFloats(generator) * 2.0 - 1.0;
-		noise.z = 0.0;
-		noise.w = 0.0;
-		ssaoNoise.push_back(noise);
+		ssaoNoise.push_back(randomFloats(generator) * 2.0f - 1.0f);
+		ssaoNoise.push_back(randomFloats(generator) * 2.0f - 1.0f);
+		ssaoNoise.push_back(0.0f);
+		ssaoNoise.push_back(0.0f);
+		
 	}
 
 	D3D11_TEXTURE2D_DESC noiseTexDesc = {};
@@ -72,7 +71,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 
 	D3D11_SUBRESOURCE_DATA texData = {};
 	texData.pSysMem = &ssaoNoise[0];
-	texData.SysMemPitch = 4 * sizeof(XMFLOAT4);
+	texData.SysMemPitch = 16 * sizeof(float);
 
 	HRESULT result = D3DContext::getCurrent()->getDevice()->CreateTexture2D(&noiseTexDesc, &texData, &noiseTexture);
 	if (FAILED(result))

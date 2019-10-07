@@ -121,7 +121,7 @@ void RenderPass::specifyRenderTarget(ID3D11RenderTargetView* newRenderTargetView
 void RenderPass::begin(float r, float g, float b, float a)
 {
 	D3DContext::getCurrent()->getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	float clr[4] = { r,g,b,1.0f };
+	float clr[4] = { r,g,b,a };
 	D3DContext::getCurrent()->getDeviceContext()->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);	//1 rtv for now, no deferred
 	D3DContext::getCurrent()->getDeviceContext()->ClearRenderTargetView(m_renderTargetView, clr);
 	D3DContext::getCurrent()->getDeviceContext()->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);	//0 on stencil test not used
