@@ -9,7 +9,7 @@ bool RenderPass::init(int width, int height, int renderPassType, int MSAALevels,
 	renderBufferDesc.ArraySize = 1;
 	renderBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	renderBufferDesc.CPUAccessFlags = 0;
-	renderBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	renderBufferDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	renderBufferDesc.Width = width;
 	renderBufferDesc.Height = height;
 	renderBufferDesc.MipLevels = 1;
@@ -31,7 +31,7 @@ bool RenderPass::init(int width, int height, int renderPassType, int MSAALevels,
 
 	//RTV/DSV descriptors
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	rtvDesc.Format = renderBufferDesc.Format;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 	rtvDesc.Texture2D.MipSlice = 0;
 
@@ -42,7 +42,7 @@ bool RenderPass::init(int width, int height, int renderPassType, int MSAALevels,
 
 	//SRV descriptors for renderbuffer and depthbuffer
 	D3D11_SHADER_RESOURCE_VIEW_DESC renderBufferViewDesc = {};
-	renderBufferViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	renderBufferViewDesc.Format = renderBufferDesc.Format;
 	renderBufferViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 	renderBufferViewDesc.Texture2D.MipLevels = 1;
 	renderBufferViewDesc.Texture2D.MostDetailedMip = 0;

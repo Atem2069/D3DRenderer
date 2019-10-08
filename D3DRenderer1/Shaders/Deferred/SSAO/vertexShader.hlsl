@@ -11,12 +11,14 @@ struct VS_OUT
 	float2 texcoord : TEXCOORD0;
 	matrix projection : TEXCOORD1;
 	float4x4 view : NORMAL0;
+	float4x4 inverseview : NORMAL4;
 };
 
 cbuffer camera : register(b0)
 {
 	matrix projection;
 	matrix view;
+	matrix inverseview;
 	vector campos;
 };
 
@@ -27,5 +29,6 @@ VS_OUT main(VS_INPUT input)
 	output.texcoord = input.texcoord;
 	output.projection = projection;
 	output.view = view;
+	output.inverseview = inverseview;
 	return output;
 }

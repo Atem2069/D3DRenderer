@@ -4,7 +4,6 @@ struct VS_OUT
 	float3 normal : NORMAL0;
 	float3 campos : NORMAL1;
 	float3 fragpos : NORMAL2;
-	float4 fragposlightspace : NORMAL3;
 	float2 texCoord : TEXCOORD0;
 };
 
@@ -12,8 +11,7 @@ struct PS_OUT
 {
 	float4 albedo : SV_TARGET0;
 	float4 fragpos : SV_TARGET1;
-	float4 fragposlightspace : SV_TARGET2;
-	float4 normal : SV_TARGET3;
+	float4 normal : SV_TARGET2;
 };
 
 cbuffer PerFrameFlags : register(b1)
@@ -33,9 +31,7 @@ PS_OUT main(VS_OUT input)
 	if (output.albedo.w < 0.5f)
 		discard;
 	output.fragpos = float4(input.fragpos, 1.0f);
-	output.fragposlightspace = input.fragposlightspace;
 	float3 norm = normalize(input.normal.xyz);
 	output.normal = float4(norm, 1.0f);
-
 	return output;
 }

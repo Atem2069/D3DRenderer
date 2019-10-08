@@ -8,17 +8,17 @@ struct VS_OUT
 
 SamplerState samplerState : register(s0);
 Texture2D fragpos : register(t1);	//Only need a few textures.
-Texture2D normal : register(t3);
+Texture2D normal : register(t2);
 
 SamplerState aoTexState : register(s1);
 Texture2D noiseTex : register(t4);
 
 cbuffer kernels : register(b2)
 {
-	float4 samples[32];
+	float4 samples[64];
 }
 
-float radius = 5.0f;
+float radius = 0.5f;
 
 
 float4 main(VS_OUT input) : SV_TARGET
@@ -36,7 +36,7 @@ float4 main(VS_OUT input) : SV_TARGET
 	TBN = transpose(TBN);
 
 	float occlusion = 0.0;
-	for (int i = 0; i < 32; ++i)
+	for (int i = 0; i < 64; ++i)
 	{
 		float3 m_sample = mul(TBN,samples[i].xyz);
 		m_sample = fragPos + m_sample * radius;
@@ -51,11 +51,11 @@ float4 main(VS_OUT input) : SV_TARGET
 		//float sampleDepth = fragpos.Sample(samplerState, offset.xy).z;
 		float sampleDepth = mul(input.view, float4(fragpos.Sample(samplerState, offset.xy))).z;
 		float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth));
-		occlusion += (sampleDepth >= m_sample.z + 0.025 ? 0.0 : 1.0) * rangeCheck;
+		occlusion += (sampleDepth >= m_sample.z + 0.0005 ? 0.0 : 1.0) * rangeCheck;
 		//occlusion += (sampleDepth >= m_sample.z + 0.025 ? 1.0 : 0.0);
 	}
 
-	occlusion = 1.0 - (occlusion / 32.0f);
+	occlusion = 1.0 - (occlusion / 64.0f);
 	occlusion = pow(occlusion, 3);
 	return float4(occlusion, occlusion, occlusion, 1.0f);
 	//return float4(1.0f, 0.0f, 0.0f, 1.0f);

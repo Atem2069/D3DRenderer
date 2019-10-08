@@ -2,8 +2,7 @@
 SamplerState samplerState : register(s0);
 Texture2D albedoTex : register(t0);
 Texture2D fragposTex : register(t1);
-Texture2D fragposlightspaceTex : register(t2);
-Texture2D normalTex : register(t3);
+Texture2D normalTex : register(t2);
 Texture2D AOTexture : register(t5);
 
 Texture2D shadowTex : register(t4);
@@ -14,6 +13,7 @@ struct VS_OUT
 	float4 position : SV_POSITION;
 	float2 texcoord : TEXCOORD0;
 	float3 campos : TEXCOORD1;
+	matrix shadowCam : TEXCOORD2;
 };
 
 struct DirectionalLight
@@ -78,10 +78,10 @@ float4 main(VS_OUT input) : SV_TARGET0
 
 	float4 albedo = albedoTex.Sample(samplerState, input.texcoord);
 	float4 fragpos = fragposTex.Sample(samplerState, input.texcoord);
-	float4 fragposlightspace = fragposlightspaceTex.Sample(samplerState, input.texcoord);
+	//float4 fragposlightspace = fragposlightspaceTex.Sample(samplerState, input.texcoord);
 	float4 normal = normalTex.Sample(samplerState, input.texcoord);
 	float3 AOFactor = AOTexture.Sample(samplerState, input.texcoord).rgb;
-
+	float4 fragposlightspace = mul(input.shadowCam, float4(fragpos.xyz, 1.0f));
 	if (!doSSAO)
 		AOFactor = 1.0f;
 
