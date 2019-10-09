@@ -36,7 +36,8 @@ struct FrameFlags
 {
 	int doFXAA;
 	int doSSAO;
-	int m_unusedAlignment[2];
+	float ssaoRadius;
+	int m_unusedalignment;
 };
 
 int main()
@@ -82,7 +83,7 @@ int main()
 		return -1;
 
 	PerspectiveCamera m_camera;
-	if (!m_camera.init(WIDTH, HEIGHT, 60.0f, 1.0f, 10000.0f))
+	if (!m_camera.init(WIDTH, HEIGHT, 60.0f, 1.0f, 1000.0f))
 		return -1;
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
@@ -149,6 +150,7 @@ int main()
 	FrameFlags m_frameFlags = {};
 	m_frameFlags.doFXAA = 1;
 	m_frameFlags.doSSAO = 1;
+	m_frameFlags.ssaoRadius = 0.5f;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
@@ -184,6 +186,7 @@ int main()
 			ImGui::Text("Position: X %.2f Y %.2f Z %.2f",temp.x,temp.y,temp.z);
 			ImGui::Checkbox("FXAA Enable", (bool*)&m_frameFlags.doFXAA);
 			ImGui::Checkbox("SSAO Enable", (bool*)&m_frameFlags.doSSAO);
+			ImGui::DragFloat("SSAO Radius", (float*)&m_frameFlags.ssaoRadius);
 			ImGui::Image((ImTextureID)m_shadowMap.getDepthBufferView(), ImVec2(256, 256));
 		}
 		ImGui::End();

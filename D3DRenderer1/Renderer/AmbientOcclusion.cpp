@@ -98,7 +98,6 @@ bool AmbientOcclusionPass::init(float width, float height)
 	noiseSamplerViewDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	noiseSamplerViewDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	
-	
 	result = D3DContext::getCurrent()->getDevice()->CreateSamplerState(&noiseSamplerViewDesc, &noiseSamplerState);
 	if (FAILED(result))
 	{
@@ -129,7 +128,7 @@ void AmbientOcclusionPass::renderAO()
 {
 
 	m_KernelConstBuffer.uploadToPixelShader(2);	//Hardcoded for now just so it can work
-	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(1, 1, &noiseSamplerState);
+	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(2, 1, &noiseSamplerState);
 	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(4, 1, &noiseTextureView);
 	m_fsQuad.draw();
 
