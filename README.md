@@ -3,6 +3,6 @@ Direct3D 11 Renderer
 
 Sort-of deferred renderer built in Direct3D 11
 
-![Renderer screenshot](https://i.gyazo.com/fcbd597c82bc787e4c2bb1aef7d7b4d2.png)
+![Renderer screenshot](https://i.gyazo.com/1dfa3a8e0a4a11cbdd20ac228fff789d.png)
 Now supports SSAO!
 
