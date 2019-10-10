@@ -11,6 +11,8 @@ struct VS_OUT
 	float3 normal : NORMAL0;
 	float3 campos : NORMAL1;
 	float3 fragpos : NORMAL2;
+	float4 fragposviewspace : NORMAL3;
+	float3 normalviewspace : NORMAL4;
 	float2 texCoord : TEXCOORD0;
 };
 
@@ -43,6 +45,8 @@ VS_OUT main(VS_INPUT input)
 	output.normal = mul((float3x3)inverseModel, input.normal);
 	output.campos = (float3)campos;
 	output.fragpos = (float3)mul(model, float4(input.position, 1.0f));
+	output.fragposviewspace = mul(mul(view, model), float4(input.position, 1.0f));
+	output.normalviewspace = mul(mul((float3x3)view, (float3x3)inverseModel), input.normal);
 	output.texCoord = input.uv;
 	return output;
 }

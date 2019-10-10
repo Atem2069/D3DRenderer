@@ -1,6 +1,6 @@
 #include "AmbientOcclusion.h"
 
-bool AmbientOcclusionPass::init(float width, float height)
+bool AmbientOcclusionPass::init(float width, float height, int noAOSamples, int randomTexWidth, int randomTexHeight)
 {
 	if (!m_AORenderPass.init(width, height, RENDERPASS_TEXTUREBUF, 1, 0))
 		return false;
@@ -18,7 +18,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 
 	std::uniform_real_distribution<float> randomFloats(0.0, 1.0);
 	std::default_random_engine generator;
-	for (unsigned int i = 0; i < 64; i++)
+	for (unsigned int i = 0; i < noAOSamples; i++)
 	{
 		XMFLOAT4 sample;
 		sample.x = randomFloats(generator) * 2.0 - 1.0;
@@ -36,7 +36,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 		sample.y *= rand;
 		sample.z *= rand;
 
-		float scale = (float)i / 64.0;
+		float scale = (float)i / (float)noAOSamples;
 		scale = lerp(0.1f, 1.0f, scale * scale);
 		sample.x *= scale;
 		sample.y *= scale;
@@ -49,7 +49,7 @@ bool AmbientOcclusionPass::init(float width, float height)
 		return false;
 
 	std::vector<float> ssaoNoise;
-	for (unsigned int i = 0; i < (4*4); i++)
+	for (unsigned int i = 0; i < (randomTexWidth*randomTexHeight)*4; i++)
 	{
 		ssaoNoise.push_back(randomFloats(generator) * 2.0f - 1.0f);
 		ssaoNoise.push_back(randomFloats(generator) * 2.0f - 1.0f);
@@ -63,15 +63,15 @@ bool AmbientOcclusionPass::init(float width, float height)
 	noiseTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	noiseTexDesc.CPUAccessFlags = 0;
 	noiseTexDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	noiseTexDesc.Width = 4;
-	noiseTexDesc.Height = 4;
+	noiseTexDesc.Width = randomTexWidth;
+	noiseTexDesc.Height = randomTexHeight;
 	noiseTexDesc.MipLevels = 1;
 	noiseTexDesc.SampleDesc.Count = 1;
 	noiseTexDesc.Usage = D3D11_USAGE_DEFAULT;
 
 	D3D11_SUBRESOURCE_DATA texData = {};
 	texData.pSysMem = &ssaoNoise[0];
-	texData.SysMemPitch = 4 * 4 * sizeof(float);
+	texData.SysMemPitch = randomTexWidth * 4;
 
 	HRESULT result = D3DContext::getCurrent()->getDevice()->CreateTexture2D(&noiseTexDesc, &texData, &noiseTexture);
 	if (FAILED(result))
@@ -129,7 +129,7 @@ void AmbientOcclusionPass::renderAO()
 
 	m_KernelConstBuffer.uploadToPixelShader(2);	//Hardcoded for now just so it can work
 	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(2, 1, &noiseSamplerState);
-	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(4, 1, &noiseTextureView);
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(5, 1, &noiseTextureView);
 	m_fsQuad.draw();
 
 	m_AOFinalRenderPass.begin(1, 1, 1, 0);

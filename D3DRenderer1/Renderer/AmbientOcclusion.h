@@ -14,7 +14,7 @@
 class AmbientOcclusionPass
 {
 public:
-	bool init(float width, float height);
+	bool init(float width, float height, int noAOSamples, int randomTexWidth, int randomTexHeight);
 	void destroy();
 
 	void begin();

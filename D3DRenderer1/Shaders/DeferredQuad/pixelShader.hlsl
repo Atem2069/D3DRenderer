@@ -85,7 +85,7 @@ float4 main(VS_OUT input) : SV_TARGET0
 	if (!doSSAO)
 		AOFactor = 1.0f;
 
-	float3 ambient = 0.3f * light.color.xyz * AOFactor;
+	float3 ambient = 0.25f * light.color.xyz * AOFactor;
 
 	float3 lightDir = normalize(-light.direction.xyz);
 	float3 norm = normal.xyz;

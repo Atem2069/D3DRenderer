@@ -83,21 +83,22 @@ int main()
 		return -1;
 
 	PerspectiveCamera m_camera;
-	if (!m_camera.init(WIDTH, HEIGHT, 60.0f, 1.0f, 1000.0f))
+	if (!m_camera.init(WIDTH, HEIGHT, 60.0f, 1.0f, 10000.0f))
 		return -1;
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
 	m_object.init(R"(Models\sponza\sponza.obj)");
-	m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0.1));
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
+	m_object2.scale(XMVectorSet(10, 10, 10, 10));
 	m_object2.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 1.0f));
 	Object m_object3;
 	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
+	m_object3.scale(XMVectorSet(10, 10, 10, 10));
 	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
-	m_object3.translate(XMVectorSet(0.0f, 2.0f, -5.5f, 1.0f));
+	m_object3.translate(XMVectorSet(0.0f, 0.0f, -15.0f, 1.0f));
 
 
 	RenderPass m_renderPass;
@@ -109,10 +110,10 @@ int main()
 	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, 1, MultisampleQuality))
 		return -1;
 
-	DXGI_FORMAT formats[3] = { DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};
+	DXGI_FORMAT formats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};
 
 	DeferredRenderPass m_deferredRenderPass;
-	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, 3, formats, MultisampleLevel,MultisampleQuality))
+	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, 5, formats, MultisampleLevel,MultisampleQuality))
 		return -1;
 
 
@@ -125,7 +126,7 @@ int main()
 		return -1;
 
 	DirectionalShadowMap m_shadowMap;
-	if (!m_shadowMap.init(4096,4096, 500,500, m_basicLight))
+	if (!m_shadowMap.init(4096,4096, 4096,4096, m_basicLight))
 		return -1;
 
 	
@@ -150,13 +151,13 @@ int main()
 	FrameFlags m_frameFlags = {};
 	m_frameFlags.doFXAA = 1;
 	m_frameFlags.doSSAO = 1;
-	m_frameFlags.ssaoRadius = 0.5f;
+	m_frameFlags.ssaoRadius = 50.0f;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
 
 	AmbientOcclusionPass m_ambientOcclusionPass;
-	m_ambientOcclusionPass.init(WIDTH, HEIGHT);
+	m_ambientOcclusionPass.init(WIDTH, HEIGHT,64,64,64);
 	
 
 	//For camera
