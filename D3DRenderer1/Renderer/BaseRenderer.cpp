@@ -184,17 +184,17 @@ void D3DContext::Register(D3D& d3d)
 	m_samplerStateAnisoFilterDesc.MaxAnisotropy = 8;
 	m_samplerStateAnisoFilterDesc.MinLOD = 0;
 	m_samplerStateAnisoFilterDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	m_samplerStateAnisoFilterDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	//m_samplerStateAnisoFilterDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	m_current->getDevice()->CreateSamplerState(&m_samplerStateAnisoFilterDesc, &m_samplerStateAnisoFilter);
 
 	D3D11_SAMPLER_DESC m_samplerStateNearestNoMipsDesc = {};
 	m_samplerStateNearestNoMipsDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
 	m_samplerStateNearestNoMipsDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	m_samplerStateNearestNoMipsDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	m_samplerStateNearestNoMipsDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+	m_samplerStateNearestNoMipsDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	m_samplerStateNearestNoMipsDesc.MinLOD = 0;
 	m_samplerStateNearestNoMipsDesc.MaxLOD = 0;
-	m_samplerStateNearestNoMipsDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	//m_samplerStateNearestNoMipsDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	m_current->getDevice()->CreateSamplerState(&m_samplerStateNearestNoMipsDesc, &m_samplerStateNearestNoMips);
 }
 

@@ -36,8 +36,15 @@ struct FrameFlags
 {
 	int doFXAA;
 	int doSSAO;
+	int doSSR;
 	float ssaoRadius;
-	int m_unusedalignment;
+	int m_kernelSize;
+	int m_ssaoPower;
+	unsigned int coarseStepCount;
+	float coarseStepIncrease;
+	unsigned int fineStepCount;
+	float tolerance;
+	int m_alignmentUnused[2];
 };
 
 int main()
@@ -88,7 +95,7 @@ int main()
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
-	m_object.init(R"(Models\sponza\sponza.obj)");
+	m_object.init(R"(Models\sponzav2\sponza.obj)");
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
 	m_object2.scale(XMVectorSet(10, 10, 10, 10));
@@ -96,18 +103,18 @@ int main()
 	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 1.0f));
 	Object m_object3;
 	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
-	m_object3.scale(XMVectorSet(10, 10, 10, 10));
+	m_object3.scale(XMVectorSet(10, 10, 10, 1));
 	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
-	m_object3.translate(XMVectorSet(0.0f, 0.0f, -15.0f, 1.0f));
+	m_object3.translate(XMVectorSet(-15.0f, 0.0f, -0.0f, 1.0f));
 
 
 	RenderPass m_renderPass;
-	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF,1,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
+	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,1,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
 		return -1;
 	m_renderPass.specifyRenderTarget(D3DContext::getCurrent()->getBackBuffer());	//Change render target to hardware render target
 
 	RenderPass m_deferredResolvePass;
-	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, 1, MultisampleQuality))
+	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, MultisampleQuality))
 		return -1;
 
 	DXGI_FORMAT formats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};
@@ -120,6 +127,7 @@ int main()
 	DirectionalLight m_basicLight;
 	m_basicLight.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f);
 	m_basicLight.direction = XMFLOAT4(-1000.0f, -5560.0f, 500.0f ,0.0f);
+	m_basicLight.specularPower = 128.0f;
 
 	ConstantBuffer m_lightUploadBuffer;
 	if (!m_lightUploadBuffer.init(&m_basicLight, sizeof(DirectionalLight)))
@@ -152,13 +160,30 @@ int main()
 	m_frameFlags.doFXAA = 1;
 	m_frameFlags.doSSAO = 1;
 	m_frameFlags.ssaoRadius = 50.0f;
+	m_frameFlags.m_kernelSize = 64;
+	m_frameFlags.m_ssaoPower = 2;
+	m_frameFlags.coarseStepCount = 64;
+	m_frameFlags.fineStepCount = 64;
+	m_frameFlags.coarseStepIncrease = 2.0f;
+	m_frameFlags.tolerance = 0.0009f;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
 
 	AmbientOcclusionPass m_ambientOcclusionPass;
-	m_ambientOcclusionPass.init(WIDTH, HEIGHT,64,64,64);
+	m_ambientOcclusionPass.init(WIDTH, HEIGHT,m_frameFlags.m_kernelSize,4,4);
+
+	//SSR
+	VertexShader m_ssrVertexShader;
+	if (!m_ssrVertexShader.init(R"(Shaders\DeferredQuad\SSR\vertexShader.hlsl)"))
+		return -1;
+	PixelShader m_ssrPixelShader;
+	if (!m_ssrPixelShader.init(R"(Shaders\DeferredQuad\SSR\pixelShader.hlsl)"))
+		return -1;
 	
+	RenderPass m_ssrRenderPass;
+	if (!m_ssrRenderPass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0))
+		return -1;
 
 	//For camera
 	float pitch = 0, yaw = 0;
@@ -183,12 +208,28 @@ int main()
 		{
 			XMFLOAT4 temp;
 			XMStoreFloat4(&temp, m_camera.cameraChangeInfo.position);
-			ImGui::DragFloat3("Light LookAt", (float*)&m_basicLight.direction);
 			ImGui::Text("Position: X %.2f Y %.2f Z %.2f",temp.x,temp.y,temp.z);
 			ImGui::Checkbox("FXAA Enable", (bool*)&m_frameFlags.doFXAA);
 			ImGui::Checkbox("SSAO Enable", (bool*)&m_frameFlags.doSSAO);
 			ImGui::DragFloat("SSAO Radius", (float*)&m_frameFlags.ssaoRadius);
+			ImGui::DragInt("SSAO Kernel Size", (int*)&m_frameFlags.m_kernelSize);
+			ImGui::DragInt("SSAO Power", (int*)&m_frameFlags.m_ssaoPower);
+			if (ImGui::RadioButton("Update SSAO Kernels", true))
+				m_ambientOcclusionPass.updateKernel(m_frameFlags.m_kernelSize);
+			ImGui::DragInt("Coarse Step Count", (int*)&m_frameFlags.coarseStepCount);
+			ImGui::DragInt("Fine Step Count", (int*)&m_frameFlags.fineStepCount);
+			ImGui::DragFloat("Coarse Step Increase", (float*)&m_frameFlags.coarseStepIncrease);
+			ImGui::DragFloat("Tolerance", (float*)&m_frameFlags.tolerance);
 			ImGui::Image((ImTextureID)m_shadowMap.getDepthBufferView(), ImVec2(256, 256));
+		}
+		ImGui::End();
+
+		ImGui::Begin("Light Properties");
+		{
+			ImGui::DragFloat3("Light LookAt", (float*)&m_basicLight.direction);
+			//ImGui::DragFloat3("Light Color", (float*)&m_basicLight.color, 0.05f, 0.0f, 10.0f);
+			ImGui::ColorPicker3("Light Color", (float*)&m_basicLight.color);
+			ImGui::DragFloat("Specular Power", &m_basicLight.specularPower);
 		}
 		ImGui::End();
 
@@ -197,6 +238,7 @@ int main()
 			for (int i = 0; i < m_deferredRenderPass.m_noRenderTargets; i++)
 				ImGui::Image((ImTextureID)m_deferredRenderPass.getRenderBufferViews()[i], ImVec2(320, 180));
 			ImGui::Image((ImTextureID)m_ambientOcclusionPass.getAOTexture(), ImVec2(320, 180));
+			ImGui::Image((ImTextureID)m_ssrRenderPass.getRenderBufferView(), ImVec2(320, 180));
 		}
 		ImGui::End();
 
@@ -229,7 +271,9 @@ int main()
 		{
 			m_ambientOcclusionPass.begin();
 			m_deferredRenderPass.bindRenderTargets(0, 0);
+			m_deferredRenderPass.bindDepthStencilTarget(6, 0);
 			m_ambientOcclusionPass.renderAO();
+			m_deferredRenderPass.unbindDepthStencilTarget(6);
 		}
 
 		//Drawing quad to combine deferred targets and get result
@@ -246,16 +290,30 @@ int main()
 		m_deferredRenderPass.unbindRenderTargets(0);	//Necessary to stop undefined behaviour
 		m_ambientOcclusionPass.unbindAOTexture(5);
 
-		//Drawing another quad for FXAA pass
+
+		//Doing screenspace reflections!!!
+		m_ssrRenderPass.begin(1, 1, 1, 1);
+		m_ssrVertexShader.bind();
+		m_ssrPixelShader.bind();
+		m_deferredRenderPass.bindRenderTargets(0, 0);
+		m_deferredRenderPass.bindDepthStencilTarget(6, 0);
+		m_deferredResolvePass.bindRenderTargetSRV(5, 0);
+		m_fsQuad.draw();
+		m_deferredRenderPass.unbindRenderTargets(0);
+		m_deferredRenderPass.unbindDepthStencilTarget(6);
+		m_deferredResolvePass.unbindRenderTargetSRV(5);
+
+		//Drawing another quad for FXAA Renderpass
 
 		m_renderPass.begin(1.0f, 1.0f, 1.0f, 1.0f);
 		m_fxaaVertexShader.bind();
 		m_fxaaPixelShader.bind();
 
-		m_deferredResolvePass.bindRenderTargetSRV(0, 0);
+		//m_deferredResolvePass.bindRenderTargetSRV(0, 0);
+		m_ssrRenderPass.bindRenderTargetSRV(0, 0);
 		m_fsQuad.draw();
 		m_deferredResolvePass.unbindRenderTargetSRV(0);
-
+		m_ssrRenderPass.unbindRenderTargetSRV(0);
 
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

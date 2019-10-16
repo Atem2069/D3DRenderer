@@ -9,4 +9,6 @@ struct DirectionalLight
 {
 	XMFLOAT4 color;
 	XMFLOAT4 direction;
+	float specularPower;
+	float m_unusedAlignment[3];
 };

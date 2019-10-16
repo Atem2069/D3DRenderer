@@ -2,9 +2,9 @@
 
 bool AmbientOcclusionPass::init(float width, float height, int noAOSamples, int randomTexWidth, int randomTexHeight)
 {
-	if (!m_AORenderPass.init(width, height, RENDERPASS_TEXTUREBUF, 1, 0))
+	if (!m_AORenderPass.init(width, height, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0))
 		return false;
-	if (!m_AOFinalRenderPass.init(width, height, RENDERPASS_TEXTUREBUF, 1, 0))
+	if (!m_AOFinalRenderPass.init(width, height, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0))
 		return false;
 
 	if (!m_AOVertexShader.init(R"(Shaders\Deferred\SSAO\vertexShader.hlsl)"))
@@ -18,7 +18,7 @@ bool AmbientOcclusionPass::init(float width, float height, int noAOSamples, int 
 
 	std::uniform_real_distribution<float> randomFloats(0.0, 1.0);
 	std::default_random_engine generator;
-	for (unsigned int i = 0; i < noAOSamples; i++)
+	for (unsigned int i = 0; i < 256; i++)
 	{
 		XMFLOAT4 sample;
 		sample.x = randomFloats(generator) * 2.0 - 1.0;
@@ -45,7 +45,7 @@ bool AmbientOcclusionPass::init(float width, float height, int noAOSamples, int 
 
 	}
 
-	if (!m_KernelConstBuffer.init(&m_ssaoKernels[0], m_ssaoKernels.size() * sizeof(XMFLOAT4)))
+	if (!m_KernelConstBuffer.init(&m_ssaoKernels[0], 256 * sizeof(XMFLOAT4)))
 		return false;
 
 	std::vector<float> ssaoNoise;
@@ -148,6 +148,41 @@ void AmbientOcclusionPass::bindAOTexture(int samplerStateBinding, int textureBin
 void AmbientOcclusionPass::unbindAOTexture(int textureBindingPoint)
 {
 	m_AOFinalRenderPass.unbindRenderTargetSRV(textureBindingPoint);
+}
+
+void AmbientOcclusionPass::updateKernel(int noSamples)
+{
+	std::vector<XMFLOAT4> ssaoKernels;
+	std::uniform_real_distribution<float> randomFloats(0.0, 1.0);
+	std::default_random_engine generator;
+	for (unsigned int i = 0; i < noSamples; i++)
+	{
+		XMFLOAT4 sample;
+		sample.x = randomFloats(generator) * 2.0 - 1.0;
+		sample.y = randomFloats(generator) * 2.0 - 1.0;
+		sample.z = randomFloats(generator);
+		sample.w = 1.0f;
+
+		XMVECTOR temp = XMLoadFloat4(&sample);
+		temp = XMVector4Normalize(temp);
+
+		XMStoreFloat4(&sample, temp);
+
+		float rand = randomFloats(generator);
+		sample.x *= rand;
+		sample.y *= rand;
+		sample.z *= rand;
+
+		float scale = (float)i / (float)noSamples;
+		scale = lerp(0.1f, 1.0f, scale * scale);
+		sample.x *= scale;
+		sample.y *= scale;
+		sample.z *= scale;
+		ssaoKernels.push_back(sample);
+
+	}
+
+	m_KernelConstBuffer.update((void*)&ssaoKernels[0], ssaoKernels.size() * sizeof(XMFLOAT4));
 }
 
 ID3D11ShaderResourceView* AmbientOcclusionPass::getAOTexture()

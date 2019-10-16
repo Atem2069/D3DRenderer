@@ -11,7 +11,7 @@
 class RenderPass
 {
 public:
-	bool init(int width, int height, int renderPassType, int MSAALevels, int MSAAQuality);
+	bool init(int width, int height, int renderPassType, DXGI_FORMAT format, int MSAALevels, int MSAAQuality);
 	void destroy();
 
 	void specifyRenderTarget(ID3D11RenderTargetView* newRenderTargetView);
@@ -45,6 +45,9 @@ public:
 
 	void bindRenderTargets(int startLocation, int samplerBinding);
 	void unbindRenderTargets(int startLocation);
+
+	void bindDepthStencilTarget(int texLoc, int samplerBinding);
+	void unbindDepthStencilTarget(int texLoc);
 
 	std::vector<ID3D11ShaderResourceView*> getRenderBufferViews();
 	ID3D11ShaderResourceView* getDepthBufferView();

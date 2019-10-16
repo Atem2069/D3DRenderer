@@ -1,6 +1,6 @@
 #include "RenderPass.h"
 
-bool RenderPass::init(int width, int height, int renderPassType, int MSAALevels, int MSAAQuality)
+bool RenderPass::init(int width, int height, int renderPassType, DXGI_FORMAT format, int MSAALevels, int MSAAQuality)
 {
 	HRESULT result;
 
@@ -9,7 +9,7 @@ bool RenderPass::init(int width, int height, int renderPassType, int MSAALevels,
 	renderBufferDesc.ArraySize = 1;
 	renderBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	renderBufferDesc.CPUAccessFlags = 0;
-	renderBufferDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	renderBufferDesc.Format = format;
 	renderBufferDesc.Width = width;
 	renderBufferDesc.Height = height;
 	renderBufferDesc.MipLevels = 1;
@@ -32,24 +32,24 @@ bool RenderPass::init(int width, int height, int renderPassType, int MSAALevels,
 	//RTV/DSV descriptors
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = renderBufferDesc.Format;
-	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 
 	//SRV descriptors for renderbuffer and depthbuffer
 	D3D11_SHADER_RESOURCE_VIEW_DESC renderBufferViewDesc = {};
 	renderBufferViewDesc.Format = renderBufferDesc.Format;
-	renderBufferViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+	renderBufferViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	renderBufferViewDesc.Texture2D.MipLevels = 1;
 	renderBufferViewDesc.Texture2D.MostDetailedMip = 0;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC depthBufferViewDesc = {};
 	depthBufferViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	depthBufferViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+	depthBufferViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	depthBufferViewDesc.Texture2D.MipLevels = 1;
 	depthBufferViewDesc.Texture2D.MostDetailedMip = 0;
 

@@ -6,11 +6,15 @@ struct VS_OUT
 
 SamplerState samplerState : register(s0);
 Texture2D inputTex : register(t0);
+Texture2D ssr : register(t1);
 
 cbuffer PerFrameFlags : register(b1)
 {
 	int doFXAA;
 	int doSSAO;
+	int doSSR;
+	float ssaoRadius;
+	int kernelSize;
 }
 
 float4 FXAA(VS_OUT input)

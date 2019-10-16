@@ -22,17 +22,20 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{033268ae-089d-412b-a7d1-91cf59f3d584}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Deferred Quad">
+    <Filter Include="Shaders\Deferred Quad %28Resolving Pass%29">
       <UniqueIdentifier>{90fee2fb-aec3-4b1f-8334-cacbb059c131}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Deferred">
-      <UniqueIdentifier>{c07e349c-fa70-4940-9fb4-607b9a44e9d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\Deferred Quad\FXAA">
+    <Filter Include="Shaders\Deferred Quad %28Resolving Pass%29\FXAA">
       <UniqueIdentifier>{0cc07b84-dec6-4134-a00f-438b1f40b8e2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Deferred\SSAO">
+    <Filter Include="Shaders\Deferred %28GBuffer Pass%29">
+      <UniqueIdentifier>{c07e349c-fa70-4940-9fb4-607b9a44e9d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Deferred %28GBuffer Pass%29\SSAO">
       <UniqueIdentifier>{1dac6e6a-e978-4a25-8c56-16f925c28e0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Deferred Quad %28Resolving Pass%29\Screenspace Reflections">
+      <UniqueIdentifier>{30e28412-fe27-4d80-bb07-b73f0953ec6f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -164,34 +167,40 @@
       <Filter>Shaders\Shadow Mapping</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\DeferredQuad\pixelShader.hlsl">
-      <Filter>Shaders\Deferred Quad</Filter>
+      <Filter>Shaders\Deferred Quad %28Resolving Pass%29</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\DeferredQuad\vertexShader.hlsl">
-      <Filter>Shaders\Deferred Quad</Filter>
+      <Filter>Shaders\Deferred Quad %28Resolving Pass%29</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Deferred\pixelShader.hlsl">
-      <Filter>Shaders\Deferred</Filter>
+      <Filter>Shaders\Deferred %28GBuffer Pass%29</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Deferred\vertexShader.hlsl">
-      <Filter>Shaders\Deferred</Filter>
+      <Filter>Shaders\Deferred %28GBuffer Pass%29</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\DeferredQuad\FXAA\vertexShader.hlsl">
-      <Filter>Shaders\Deferred Quad\FXAA</Filter>
+      <Filter>Shaders\Deferred Quad %28Resolving Pass%29\FXAA</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\DeferredQuad\FXAA\pixelShader.hlsl">
-      <Filter>Shaders\Deferred Quad\FXAA</Filter>
+      <Filter>Shaders\Deferred Quad %28Resolving Pass%29\FXAA</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Deferred\SSAO\blurPixelShader.hlsl">
-      <Filter>Shaders\Deferred\SSAO</Filter>
+      <Filter>Shaders\Deferred %28GBuffer Pass%29\SSAO</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Deferred\SSAO\blurVertexShader.hlsl">
-      <Filter>Shaders\Deferred\SSAO</Filter>
+      <Filter>Shaders\Deferred %28GBuffer Pass%29\SSAO</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Deferred\SSAO\pixelShader.hlsl">
-      <Filter>Shaders\Deferred\SSAO</Filter>
+      <Filter>Shaders\Deferred %28GBuffer Pass%29\SSAO</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Deferred\SSAO\vertexShader.hlsl">
-      <Filter>Shaders\Deferred\SSAO</Filter>
+      <Filter>Shaders\Deferred %28GBuffer Pass%29\SSAO</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DeferredQuad\SSR\pixelShader.hlsl">
+      <Filter>Shaders\Deferred Quad %28Resolving Pass%29\Screenspace Reflections</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DeferredQuad\SSR\vertexShader.hlsl">
+      <Filter>Shaders\Deferred Quad %28Resolving Pass%29\Screenspace Reflections</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

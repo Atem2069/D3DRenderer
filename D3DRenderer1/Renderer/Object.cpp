@@ -7,7 +7,7 @@ bool Object::init(std::string path)
 	ID3D11Device* device = D3DContext::getCurrent()->getDevice();	//Save device ref for creating buffers 
 
 	Assimp::Importer m_importer;
-	const aiScene* m_scene = m_importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_OptimizeMeshes | aiProcess_GenSmoothNormals);	//Convert to left handed cause d3d coordinates are special
+	const aiScene* m_scene = m_importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_OptimizeMeshes | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);	//Convert to left handed cause d3d coordinates are special
 
 	if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
 	{
@@ -38,6 +38,17 @@ bool Object::init(std::string path)
 			tempVertex.uv.x = 0.0f;
 			tempVertex.uv.y = 0.0f;
 
+			if (currentMesh->HasTangentsAndBitangents())
+			{
+				tempVertex.tangent.x = currentMesh->mTangents[j].x;
+				tempVertex.tangent.y = currentMesh->mTangents[j].y;
+				tempVertex.tangent.z = currentMesh->mTangents[j].z;
+
+				tempVertex.bitangent.x = currentMesh->mBitangents[j].x;
+				tempVertex.bitangent.y = currentMesh->mBitangents[j].y;
+				tempVertex.bitangent.z = currentMesh->mBitangents[j].z;
+			}
+
 			if (currentMesh->HasTextureCoords(0))
 			{
 				tempVertex.uv.x = currentMesh->mTextureCoords[0][j].x;
@@ -66,11 +77,11 @@ bool Object::init(std::string path)
 		//Sorting out textures
 		if (currentMesh->mMaterialIndex > 0)
 		{
-			bool loadTexture = true;
 			aiMaterial* material = m_scene->mMaterials[currentMesh->mMaterialIndex];
 			tempMesh.m_material.m_materialIndex = currentMesh->mMaterialIndex;
 			if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
 			{
+				bool loadTexture = true;
 				for (int j = 0; j < i; j++)
 				{
 					if (m_meshes[j].m_material.m_materialIndex == currentMesh->mMaterialIndex)
@@ -88,6 +99,7 @@ bool Object::init(std::string path)
 					tempMesh.m_material.m_albedoTexture.init(texturePath);
 				}
 			}
+
 
 		}
 		m_meshes.push_back(tempMesh);
@@ -131,6 +143,9 @@ bool Object::init(std::string path)
 
 	//Setting up object transformation
 	m_transformation.model = XMMatrixIdentity();
+	m_transformation.model = XMMatrixMultiply(XMMatrixTranslation(1, 1, 1), m_transformation.model);
+	m_transformation.model = XMMatrixMultiply(XMMatrixRotationAxis(XMVectorSet(1, 1, 1, 1), 0), m_transformation.model);
+	m_transformation.model = XMMatrixMultiply(XMMatrixScaling(1, 1, 1), m_transformation.model);
 	m_transformation.inverseModel = XMMatrixTranspose(XMMatrixInverse(nullptr, m_transformation.model));
 
 	D3D11_BUFFER_DESC cbDesc = {};
@@ -196,18 +211,18 @@ void Object::draw()
 
 void Object::rotate(FXMVECTOR axis, float angleDegrees)
 {
-	m_transformation.model = XMMatrixMultiply(XMMatrixRotationAxis(axis, XMConvertToRadians(angleDegrees)), m_transformation.model);
+	m_transformation.model = XMMatrixMultiply(XMMatrixRotationAxis(axis, XMConvertToRadians(angleDegrees)),m_transformation.model);
 	requiresUpdate = true;
 	
 }
 void Object::scale(FXMVECTOR scaleAxis)
 {
-	m_transformation.model = XMMatrixMultiply(XMMatrixScalingFromVector(scaleAxis), m_transformation.model);
+	m_transformation.model = XMMatrixMultiply(XMMatrixScalingFromVector(scaleAxis),m_transformation.model);
 	requiresUpdate = true;
 }
 void Object::translate(FXMVECTOR transAxis)
 {
-	m_transformation.model = XMMatrixMultiply(XMMatrixTranslationFromVector(transAxis), m_transformation.model);
+	m_transformation.model = XMMatrixMultiply(XMMatrixTranslationFromVector(transAxis),m_transformation.model);
 	requiresUpdate = true;
 }
 

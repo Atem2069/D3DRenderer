@@ -19,7 +19,7 @@ float4 main(VS_OUT input) : SV_TARGET
 			result += inputTex.Sample(samplerState, input.texcoord + offset).r;
 		}
 	}
-
+	//return inputTex.Sample(samplerState, input.texcoord);
 	result = result / (4.0 * 4.0);
 	return float4(result, result, result, 1.0f);
 }

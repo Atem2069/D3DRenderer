@@ -32,7 +32,7 @@ bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FO
 
 		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 		rtvDesc.Format = backBufferDesc.Format;
-		rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+		rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 		
 		result = D3DContext::getCurrent()->getDevice()->CreateRenderTargetView(m_renderBuffers[i], &rtvDesc, &m_renderTargetViews[i]);
 		if (FAILED(result))
@@ -43,7 +43,8 @@ bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FO
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Format = backBufferDesc.Format;
-		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = 1;
 
 		result = D3DContext::getCurrent()->getDevice()->CreateShaderResourceView(m_renderBuffers[i], &srvDesc, &m_renderBufferViews[i]);
 		if (FAILED(result))
@@ -70,7 +71,7 @@ bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FO
 	result = D3DContext::getCurrent()->getDevice()->CreateTexture2D(&depthBufferDesc, nullptr, &m_depthBuffer);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	result = D3DContext::getCurrent()->getDevice()->CreateDepthStencilView(m_depthBuffer, &dsvDesc, &m_depthStencilView);
@@ -82,7 +83,8 @@ bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FO
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDescDepth = {};
 	srvDescDepth.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	srvDescDepth.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+	srvDescDepth.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDescDepth.Texture2D.MipLevels = 1;
 
 	result = D3DContext::getCurrent()->getDevice()->CreateShaderResourceView(m_depthBuffer, &srvDescDepth, &m_depthBufferView);
 	if (FAILED(result))
@@ -126,6 +128,18 @@ void DeferredRenderPass::unbindRenderTargets(int startLocation)
 {
 	ID3D11ShaderResourceView* views[8] = { nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
 	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(startLocation, m_noRenderTargets, views);
+}
+
+void DeferredRenderPass::bindDepthStencilTarget(int texLoc, int samplerBinding)
+{
+	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(samplerBinding, 1, &D3DContext::m_samplerStateNearestNoMips);
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(texLoc, 1, &m_depthBufferView);
+}
+
+void DeferredRenderPass::unbindDepthStencilTarget(int texLoc)
+{
+	ID3D11ShaderResourceView* blank = nullptr;
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(texLoc, 1, &blank);
 }
 
 std::vector<ID3D11ShaderResourceView*> DeferredRenderPass::getRenderBufferViews()

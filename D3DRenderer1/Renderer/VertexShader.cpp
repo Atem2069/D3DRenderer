@@ -24,7 +24,7 @@ bool VertexShader::init(std::string path)
 	}
 
 	//...why
-	D3D11_INPUT_ELEMENT_DESC inputLayouts[3];
+	D3D11_INPUT_ELEMENT_DESC inputLayouts[5];
 	
 	inputLayouts[0].AlignedByteOffset = 0;
 	inputLayouts[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -50,7 +50,23 @@ bool VertexShader::init(std::string path)
 	inputLayouts[2].SemanticIndex = 0;
 	inputLayouts[2].SemanticName = "TEXCOORD";
 
-	result = D3DContext::getCurrent()->getDevice()->CreateInputLayout(inputLayouts, 3, byteCode->GetBufferPointer(), byteCode->GetBufferSize(), &m_inputLayout);
+	inputLayouts[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	inputLayouts[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputLayouts[3].InputSlot = 0;
+	inputLayouts[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayouts[3].InstanceDataStepRate = 0;
+	inputLayouts[3].SemanticIndex = 0;
+	inputLayouts[3].SemanticName = "TANGENT";
+
+	inputLayouts[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	inputLayouts[4].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputLayouts[4].InputSlot = 0;
+	inputLayouts[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayouts[4].InstanceDataStepRate = 0;
+	inputLayouts[4].SemanticIndex = 0;
+	inputLayouts[4].SemanticName = "BITANGENT";
+
+	result = D3DContext::getCurrent()->getDevice()->CreateInputLayout(inputLayouts, 5, byteCode->GetBufferPointer(), byteCode->GetBufferSize(), &m_inputLayout);
 	if (FAILED(result))
 	{
 		std::cout << "Failed to create input layout. HRESULT " << result << std::endl;

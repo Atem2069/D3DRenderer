@@ -10,6 +10,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <intrin.h>
 
 class AmbientOcclusionPass
 {
@@ -22,6 +23,8 @@ public:
 
 	void bindAOTexture(int samplerStateBinding, int textureBindingPoint);
 	void unbindAOTexture(int textureBindingPoint);
+
+	void updateKernel(int numSamples);
 
 	ID3D11ShaderResourceView* getAOTexture();
 private:
@@ -47,4 +50,14 @@ private:
 	{
 		return a + f * (b - a);
 	}
+
+	const int compact_range = 20000;
+
+	short compactFloat(double input) {
+		return round(input * compact_range / 1000);
+	}
+	double expandToFloat(short input) {
+		return ((double)input) * 1000 / compact_range;
+	}
+
 };

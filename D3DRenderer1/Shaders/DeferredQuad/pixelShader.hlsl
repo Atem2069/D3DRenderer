@@ -20,6 +20,7 @@ struct DirectionalLight
 {
 	float4 color;
 	float4 direction;
+	float specularPower;
 };
 
 cbuffer LightInformation : register(b0)
@@ -31,6 +32,9 @@ cbuffer PerFrameFlags : register(b1)
 {
 	int doFXAA;
 	int doSSAO;
+	int doSSR;
+	float ssaoRadius;
+	int kernelSize;
 };
 
 float4 MSAAResolve(Texture2DMS<float4> inputTexture, int numSamples, uint2 pixelTexCoords)
@@ -84,7 +88,6 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float4 fragposlightspace = mul(input.shadowCam, float4(fragpos.xyz, 1.0f));
 	if (!doSSAO)
 		AOFactor = 1.0f;
-
 	float3 ambient = 0.25f * light.color.xyz * AOFactor;
 
 	float3 lightDir = normalize(-light.direction.xyz);
@@ -98,7 +101,7 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float3 halfwayDir = normalize(lightDir + viewDir);
 
 	float specularIntensity = 2.5f;
-	float spec = pow(max(dot(norm, halfwayDir), 0.0f), 128.0f) * specularIntensity;
+	float spec = pow(max(dot(norm, halfwayDir), 0.0f), light.specularPower) * specularIntensity;
 	float3 specular = light.color.xyz * spec;
 
 	float shadowFactor = shadowCalculation(fragposlightspace, norm, lightDir);
