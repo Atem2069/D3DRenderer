@@ -29,6 +29,6 @@ VS_OUT main(VS_INPUT input)
 	output.position = float4(input.position, 1.0f);
 	output.texcoord = input.texcoord;
 	output.projection = projection;
-	output.view = view;
+	output.view = transpose(view);
 	return output;
 }

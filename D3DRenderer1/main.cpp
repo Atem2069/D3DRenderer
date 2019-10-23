@@ -37,6 +37,7 @@ struct FrameFlags
 	int doFXAA;
 	int doSSAO;
 	int doSSR;
+	int doTexturing;
 	float ssaoRadius;
 	int m_kernelSize;
 	int m_ssaoPower;
@@ -44,7 +45,9 @@ struct FrameFlags
 	float coarseStepIncrease;
 	unsigned int fineStepCount;
 	float tolerance;
-	int m_alignmentUnused[2];
+	float ssrReflectiveness;
+	float ssrMetallic;
+	int unusedalignment[3];
 };
 
 int main()
@@ -83,29 +86,30 @@ int main()
 
 	//Now intializing direct3d stuff
 	VertexShader m_vertexShader;
-	if (!m_vertexShader.init(R"(Shaders\Deferred\vertexShader.hlsl)"))
+	if(!m_vertexShader.loadCompiled(R"(CompiledShaders\Deferred\vertexShader.cso)"))
 		return -1;
 	PixelShader m_pixelShader;
-	if (!m_pixelShader.init(R"(Shaders\Deferred\pixelShader.hlsl)"))
+	if (!m_pixelShader.loadCompiled(R"(CompiledShaders\Deferred\pixelShader.cso)"))
 		return -1;
 
 	PerspectiveCamera m_camera;
-	if (!m_camera.init(WIDTH, HEIGHT, 60.0f, 1.0f, 10000.0f))
+	if (!m_camera.init(WIDTH, HEIGHT, 45.0f, 1.0f, 1000.0f))
 		return -1;
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
 	m_object.init(R"(Models\sponzav2\sponza.obj)");
+	m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
-	m_object2.scale(XMVectorSet(10, 10, 10, 10));
+	//m_object2.scale(XMVectorSet(10, 10, 10, 0));
 	m_object2.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
-	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 1.0f));
+	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 0.0f));
 	Object m_object3;
 	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
-	m_object3.scale(XMVectorSet(10, 10, 10, 1));
+	//m_object3.scale(XMVectorSet(50, 50, 50, 0));
 	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
-	m_object3.translate(XMVectorSet(-15.0f, 0.0f, -0.0f, 1.0f));
+	m_object3.translate(XMVectorSet(-15.5f, 0.0f, -0.0f, 0.0f));
 
 
 	RenderPass m_renderPass;
@@ -117,8 +121,7 @@ int main()
 	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, MultisampleQuality))
 		return -1;
 
-	DXGI_FORMAT formats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};
-
+	DXGI_FORMAT formats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};;
 	DeferredRenderPass m_deferredRenderPass;
 	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, 5, formats, MultisampleLevel,MultisampleQuality))
 		return -1;
@@ -134,7 +137,7 @@ int main()
 		return -1;
 
 	DirectionalShadowMap m_shadowMap;
-	if (!m_shadowMap.init(4096,4096, 4096,4096, m_basicLight))
+	if (!m_shadowMap.init(4096,4096, 410,410, m_basicLight))
 		return -1;
 
 	
@@ -143,29 +146,33 @@ int main()
 	if (!m_fsQuad.init())
 		return -1;
 	VertexShader m_qVertexShader;
-	if (!m_qVertexShader.init(R"(Shaders\DeferredQuad\vertexShader.hlsl)"))
+	if (!m_qVertexShader.loadCompiled(R"(CompiledShaders\DeferredQuad\vertexShader.cso)"))
 		return -1;
 	PixelShader m_qPixelShader;
-	if (!m_qPixelShader.init(R"(Shaders\DeferredQuad\pixelShader.hlsl)"))
+	if (!m_qPixelShader.loadCompiled(R"(CompiledShaders\DeferredQuad\pixelShader.cso)"))
 		return -1;
 
 	VertexShader m_fxaaVertexShader;
-	if (!m_fxaaVertexShader.init(R"(Shaders\DeferredQuad\FXAA\vertexShader.hlsl)"))
+	if (!m_fxaaVertexShader.loadCompiled(R"(CompiledShaders\DeferredQuad\FXAA\vertexShader.cso)"))
 		return -1;
 	PixelShader m_fxaaPixelShader;
-	if (!m_fxaaPixelShader.init(R"(Shaders\DeferredQuad\FXAA\pixelShader.hlsl)"))
+	if (!m_fxaaPixelShader.loadCompiled(R"(CompiledShaders\DeferredQuad\FXAA\pixelShader.cso)"))
 		return -1;
 
 	FrameFlags m_frameFlags = {};
 	m_frameFlags.doFXAA = 1;
 	m_frameFlags.doSSAO = 1;
+	m_frameFlags.doSSR = 1;
+	m_frameFlags.doTexturing = 1;
 	m_frameFlags.ssaoRadius = 50.0f;
 	m_frameFlags.m_kernelSize = 64;
 	m_frameFlags.m_ssaoPower = 2;
 	m_frameFlags.coarseStepCount = 64;
 	m_frameFlags.fineStepCount = 64;
-	m_frameFlags.coarseStepIncrease = 2.0f;
-	m_frameFlags.tolerance = 0.0009f;
+	m_frameFlags.coarseStepIncrease = 1.125f;
+	m_frameFlags.tolerance = 999.0f;
+	m_frameFlags.ssrMetallic = 1.0f;
+	m_frameFlags.ssrReflectiveness = 1.0f;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
@@ -175,10 +182,10 @@ int main()
 
 	//SSR
 	VertexShader m_ssrVertexShader;
-	if (!m_ssrVertexShader.init(R"(Shaders\DeferredQuad\SSR\vertexShader.hlsl)"))
+	if (!m_ssrVertexShader.loadCompiled(R"(CompiledShaders\DeferredQuad\SSR\vertexShader.cso)"))
 		return -1;
 	PixelShader m_ssrPixelShader;
-	if (!m_ssrPixelShader.init(R"(Shaders\DeferredQuad\SSR\pixelShader.hlsl)"))
+	if (!m_ssrPixelShader.loadCompiled(R"(CompiledShaders\DeferredQuad\SSR\pixelShader.cso)"))
 		return -1;
 	
 	RenderPass m_ssrRenderPass;
@@ -191,7 +198,7 @@ int main()
 
 	//Calculating deltatime
 	float oldTime = 0, newTime=0, deltaTime=1;
-	float cameraSpeed = 250.0f;
+	float cameraSpeed = 25.0f;
 
 	//These are set before because binds per-frame is TERRIBLE for performance.
 	m_lightUploadBuffer.uploadToPixelShader(0);
@@ -211,15 +218,13 @@ int main()
 			ImGui::Text("Position: X %.2f Y %.2f Z %.2f",temp.x,temp.y,temp.z);
 			ImGui::Checkbox("FXAA Enable", (bool*)&m_frameFlags.doFXAA);
 			ImGui::Checkbox("SSAO Enable", (bool*)&m_frameFlags.doSSAO);
+			ImGui::Checkbox("SSR Enable", (bool*)&m_frameFlags.doSSR);
+			ImGui::Checkbox("Textures", (bool*)&m_frameFlags.doTexturing);
 			ImGui::DragFloat("SSAO Radius", (float*)&m_frameFlags.ssaoRadius);
 			ImGui::DragInt("SSAO Kernel Size", (int*)&m_frameFlags.m_kernelSize);
 			ImGui::DragInt("SSAO Power", (int*)&m_frameFlags.m_ssaoPower);
 			if (ImGui::RadioButton("Update SSAO Kernels", true))
 				m_ambientOcclusionPass.updateKernel(m_frameFlags.m_kernelSize);
-			ImGui::DragInt("Coarse Step Count", (int*)&m_frameFlags.coarseStepCount);
-			ImGui::DragInt("Fine Step Count", (int*)&m_frameFlags.fineStepCount);
-			ImGui::DragFloat("Coarse Step Increase", (float*)&m_frameFlags.coarseStepIncrease);
-			ImGui::DragFloat("Tolerance", (float*)&m_frameFlags.tolerance);
 			ImGui::Image((ImTextureID)m_shadowMap.getDepthBufferView(), ImVec2(256, 256));
 		}
 		ImGui::End();
@@ -227,9 +232,19 @@ int main()
 		ImGui::Begin("Light Properties");
 		{
 			ImGui::DragFloat3("Light LookAt", (float*)&m_basicLight.direction);
-			//ImGui::DragFloat3("Light Color", (float*)&m_basicLight.color, 0.05f, 0.0f, 10.0f);
 			ImGui::ColorPicker3("Light Color", (float*)&m_basicLight.color);
 			ImGui::DragFloat("Specular Power", &m_basicLight.specularPower);
+		}
+		ImGui::End();
+
+		ImGui::Begin("SSR Properties");
+		{
+			ImGui::DragInt("Coarse Step Count", (int*)&m_frameFlags.coarseStepCount);
+			ImGui::DragInt("Fine Step Count", (int*)&m_frameFlags.fineStepCount);
+			ImGui::DragFloat("Coarse Step Increase", (float*)&m_frameFlags.coarseStepIncrease);
+			ImGui::DragFloat("Tolerance", (float*)&m_frameFlags.tolerance);
+			ImGui::DragFloat("Reflectiveness", (float*)&m_frameFlags.ssrReflectiveness,0.005f,0.0f,1.0f);
+			ImGui::DragFloat("Metallic factor", (float*)&m_frameFlags.ssrMetallic,0.005f,0.0f,1.0f);
 		}
 		ImGui::End();
 
@@ -241,6 +256,7 @@ int main()
 			ImGui::Image((ImTextureID)m_ssrRenderPass.getRenderBufferView(), ImVec2(320, 180));
 		}
 		ImGui::End();
+
 
 		m_shadowMap.beginFrame(m_basicLight);
 		m_object.draw();

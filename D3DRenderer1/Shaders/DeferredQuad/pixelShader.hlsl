@@ -33,6 +33,7 @@ cbuffer PerFrameFlags : register(b1)
 	int doFXAA;
 	int doSSAO;
 	int doSSR;
+	int doTexturing;
 	float ssaoRadius;
 	int kernelSize;
 };
@@ -47,7 +48,7 @@ float4 MSAAResolve(Texture2DMS<float4> inputTexture, int numSamples, uint2 pixel
 }
 
 
-#define BIAS 0.0006
+#define BIAS 0.00006
 
 float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir)
 {
@@ -93,14 +94,14 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float3 lightDir = normalize(-light.direction.xyz);
 	float3 norm = normal.xyz;
 
-	float diffuseIntensity = 2.5f;
+	float diffuseIntensity = 1.0f;
 	float diff = max(dot(norm, lightDir), 0.0f) * diffuseIntensity;
 	float3 diffuse = light.color.xyz * diff;
 
 	float3 viewDir = normalize(input.campos - fragpos.xyz);
 	float3 halfwayDir = normalize(lightDir + viewDir);
 
-	float specularIntensity = 2.5f;
+	float specularIntensity = 1.5f;
 	float spec = pow(max(dot(norm, halfwayDir), 0.0f), light.specularPower) * specularIntensity;
 	float3 specular = light.color.xyz * spec;
 

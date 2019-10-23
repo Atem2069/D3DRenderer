@@ -7,7 +7,7 @@ bool Object::init(std::string path)
 	ID3D11Device* device = D3DContext::getCurrent()->getDevice();	//Save device ref for creating buffers 
 
 	Assimp::Importer m_importer;
-	const aiScene* m_scene = m_importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_OptimizeMeshes | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);	//Convert to left handed cause d3d coordinates are special
+	const aiScene* m_scene = m_importer.ReadFile(path, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);	//Convert to left handed cause d3d coordinates are special
 
 	if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
 	{
@@ -100,6 +100,51 @@ bool Object::init(std::string path)
 				}
 			}
 
+			if (material->GetTextureCount(aiTextureType_DISPLACEMENT) > 0)
+			{
+				bool loadTexture = true;
+				for (int j = 0; j < i; j++)
+				{
+					if (m_meshes[j].m_material.m_materialIndex == currentMesh->mMaterialIndex)
+					{
+						loadTexture = false;
+						tempMesh.m_material.m_normalMap = m_meshes[j].m_material.m_normalMap;
+					}
+				}
+
+				if (loadTexture)
+				{
+					aiString texPath;
+					material->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
+					std::string texFile = texPath.C_Str();
+					std::string texturePath = dir + texFile;
+					std::cout << texturePath << std::endl;
+					tempMesh.m_material.m_normalMap.init(texturePath);
+				}
+			}
+
+			if (material->GetTextureCount(aiTextureType_HEIGHT) > 0)
+			{
+				bool loadTexture = true;
+				for (int j = 0; j < i; j++)
+				{
+					if (m_meshes[j].m_material.m_materialIndex == currentMesh->mMaterialIndex)
+					{
+						loadTexture = false;
+						tempMesh.m_material.m_normalMap = m_meshes[j].m_material.m_normalMap;
+					}
+				}
+
+				if (loadTexture)
+				{
+					aiString texPath;
+					material->GetTexture(aiTextureType_HEIGHT, 0, &texPath);
+					std::string texFile = texPath.C_Str();
+					std::string texturePath = dir + texFile;
+					std::cout << texturePath << std::endl;
+					tempMesh.m_material.m_normalMap.init(texturePath);
+				}
+			}
 
 		}
 		m_meshes.push_back(tempMesh);
@@ -183,6 +228,7 @@ void Object::doCPUUpdate()
 {
 	if (requiresUpdate)
 	{
+		m_transformation.model = (m_transformation.model);
 		m_transformation.inverseModel = XMMatrixTranspose(XMMatrixInverse(nullptr, m_transformation.model));
 		D3D11_MAPPED_SUBRESOURCE resData;
 		HRESULT result = D3DContext::getCurrent()->getDeviceContext()->Map(m_transformationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resData);
@@ -205,6 +251,7 @@ void Object::draw()
 	for (int i = 0; i < m_meshes.size(); i++)
 	{
 		m_meshes[i].m_material.m_albedoTexture.bind(0);
+		m_meshes[i].m_material.m_normalMap.bind(1);
 		deviceContext->DrawIndexed(m_meshes[i].m_numElements, m_meshes[i].m_baseElement, m_meshes[i].m_baseVertex);
 	}
 }

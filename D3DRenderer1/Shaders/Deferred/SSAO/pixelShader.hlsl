@@ -24,38 +24,17 @@ cbuffer PerFrameFlags : register(b1)
 	int doFXAA;
 	int doSSAO;
 	int doSSR;
+	int doTexturing;
 	float ssaoRadius;
 	int kernelSize;
 	int ssaoPower;
 };
 
-float hash(float n)
-{
-	return frac(sin(n)*43758.5453);
-}
-
-float noise(float3 x)
-{
-	// The noise function returns a value in the range -1.0f -> 1.0f
-
-	float3 p = floor(x);
-	float3 f = frac(x);
-
-	f = f * f*(3.0 - 2.0*f);
-	float n = p.x + p.y*57.0 + 113.0*p.z;
-
-	return lerp(lerp(lerp(hash(n + 0.0), hash(n + 1.0), f.x),
-		lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
-		lerp(lerp(hash(n + 113.0), hash(n + 114.0), f.x),
-			lerp(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);
-}
-
 static const float near = 1.0; // projection matrix's near plane
-static const float far = 10000.0; // projection matrix's far plane
+static const float far = 20000.0; // projection matrix's far plane
 float LinearizeDepth(float depth)
 {
-	//float z = depth * 2.0 - 1.0; // back to NDC (not in d3d11)
-	float z = depth;
+	float z = depth *2.0 - 1.0; // back to NDC (not in d3d11)
 	return (2.0 * near * far) / (far + near - z * (far - near));
 }
 
@@ -69,8 +48,6 @@ float4 main(VS_OUT input) : SV_TARGET
 	float3 norm = normal.Sample(samplerState, input.texcoord);
 	float2 randomSamplingCoords = float2(1600.0f / 4.0f, 900.0f / 4.0f);
 	float3 randomVec = noiseTex.Sample(aoTexState, input.texcoord*randomSamplingCoords).rgb;
-	//float3 randomVec = float3(noise(float3(input.texcoord,0.0f)), noise(float3(input.texcoord*randomSamplingCoords,1.0f)), 0.0f);
-	//return float4(randomVec, 1.0f);
 	float3 tangent = normalize(randomVec - norm * dot(randomVec, norm));
 	float3 bitangent = cross(norm, tangent);
 	float3x3 TBN = float3x3(tangent, bitangent, norm);
@@ -86,15 +63,11 @@ float4 main(VS_OUT input) : SV_TARGET
 		offset.xy /= offset.w;
 		offset.x = offset.x / 2 + 0.5;
 		offset.y = offset.y / -2 + 0.5;
-		//offset.z = offset.z / 2 + 0.5;// - big no - D3D11 does 0-1 coords.
-
-		float sampleDepth = fragpos.Sample(samplerState, offset.xy).z;
-		//float sampleDepth = depth.Sample(samplerState, offset.xy);
-		//sampleDepth = LinearizeDepth(sampleDepth);
-		//float sampleDepth = mul(input.view, float4(fragpos.Sample(samplerState, offset.xy))).z;
+		offset.z = offset.z;
+		float4 sampleCoord = fragpos.Sample(samplerState, offset.xy);
+		float sampleDepth = sampleCoord.z * sampleCoord.w;
 		float rangeCheck = smoothstep(0.0, 1.0, ssaoRadius / abs(fragPos.z - sampleDepth));
-		occlusion += (sampleDepth >= m_sample.z + 0.025 ? 0.0 : 1.0) * rangeCheck;
-		//occlusion += (sampleDepth >= m_sample.z + 0.025 ? 1.0 : 0.0);
+		occlusion += (sampleDepth >= m_sample.z + 0.0006 ? 0.0 : 1.0) *rangeCheck;
 	}
 
 	occlusion = 1.0 - (occlusion / (float)numSamples);

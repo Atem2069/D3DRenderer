@@ -16,7 +16,6 @@ struct VS_OUT
 	float4 fragposviewspace : NORMAL3;
 	float3 normalviewspace : NORMAL4;
 	float2 texCoord : TEXCOORD0;
-	float3x3 TBN : TEXCOORD1;
 };
 
 cbuffer camera : register(b0)
@@ -79,25 +78,16 @@ float4x4 inverse(float4x4 m) {
 
 VS_OUT main(VS_INPUT input)
 {
-	//Calculate TBN
-	float3 T = normalize(mul(inverseModel, float4(input.tangent, 0.0f)).xyz);
-	float3 B = normalize(mul(inverseModel, float4(input.bitangent, 0.0f)).xyz);
-	float3 N = normalize(mul(inverseModel, float4(input.normal, 0.0f)).xyz);
-	T = normalize(T - dot(T, N)*N);
-	B = cross(N, T);
-	float3x3 TBN = float3x3(T, B, N);
 	matrix translationMatrix = mul(projection, view);
 	translationMatrix = mul(translationMatrix, model);
 	matrix shadowTransMatrix = mul(shadowProj, shadowView);
 	VS_OUT output;
-	output.TBN = TBN;
 	output.position = mul(translationMatrix, float4(input.position, 1.0f));
 	output.normal = mul((float3x3)inverseModel, input.normal);
 	output.campos = (float3)campos;
 	output.fragpos = (float3)mul(model, float4(input.position, 1.0f));
 	output.fragposviewspace = mul(mul(view,model), float4(input.position, 1.0f));
-	float3x3 normalmatrix = (float3x3)transpose(inverse(model));
-	output.normalviewspace = mul(mul((float3x3)view, (float3x3)normalmatrix), input.normal);
+	output.normalviewspace = mul(mul((float3x3)view, (float3x3)inverseModel), input.normal);
 	//float3x3 normalmatrix = (float3x3)transpose(inverse(mul(model,view)));
 	//output.normalviewspace = mul(normalmatrix,input.normal);
 	output.texCoord = input.uv;

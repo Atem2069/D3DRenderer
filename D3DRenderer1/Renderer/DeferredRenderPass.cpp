@@ -59,7 +59,8 @@ bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FO
 	depthBufferDesc.ArraySize = 1;
 	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthBufferDesc.CPUAccessFlags = 0;
-	depthBufferDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	//depthBufferDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	depthBufferDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 	depthBufferDesc.Width = width;
 	depthBufferDesc.Height = height;
 	depthBufferDesc.MipLevels = 1;
@@ -72,7 +73,8 @@ bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FO
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	//dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 
 	result = D3DContext::getCurrent()->getDevice()->CreateDepthStencilView(m_depthBuffer, &dsvDesc, &m_depthStencilView);
 	if (FAILED(result))
@@ -82,7 +84,8 @@ bool DeferredRenderPass::init(int width, int height,int noRenderTargets, DXGI_FO
 	}
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDescDepth = {};
-	srvDescDepth.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	//srvDescDepth.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDescDepth.Format = DXGI_FORMAT_R32_FLOAT;
 	srvDescDepth.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDescDepth.Texture2D.MipLevels = 1;
 

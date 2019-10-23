@@ -27,6 +27,32 @@ bool PixelShader::init(std::string path)
 	return true;
 }
 
+bool PixelShader::loadCompiled(std::string path)
+{
+	HRESULT result;
+	std::wstring temp = std::wstring(path.begin(), path.end());
+	LPCWSTR filePath = temp.c_str();
+	ID3D10Blob* fileContents;
+
+	result = D3DReadFileToBlob(filePath, &fileContents);
+	if (FAILED(result))
+	{
+		std::cout << "File : " << path << std::endl;
+		std::cout << "Failed to load compiled shader. HRESULT " << result << std::endl;
+		return false;
+	}
+
+	result = D3DContext::getCurrent()->getDevice()->CreatePixelShader(fileContents->GetBufferPointer(), fileContents->GetBufferSize(), nullptr, &m_pixelShader);
+	if (FAILED(result))
+	{
+		std::cout << "File : " << path << std::endl;
+		std::cout << "Failed to create pixel shader. HRESULT " << result << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 void PixelShader::destroy()
 {
 	m_pixelShader->Release();

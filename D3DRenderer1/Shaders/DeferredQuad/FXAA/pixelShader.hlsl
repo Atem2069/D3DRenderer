@@ -13,6 +13,7 @@ cbuffer PerFrameFlags : register(b1)
 	int doFXAA;
 	int doSSAO;
 	int doSSR;
+	int doTexturing;
 	float ssaoRadius;
 	int kernelSize;
 }

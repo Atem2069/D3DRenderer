@@ -7,13 +7,13 @@ bool AmbientOcclusionPass::init(float width, float height, int noAOSamples, int 
 	if (!m_AOFinalRenderPass.init(width, height, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0))
 		return false;
 
-	if (!m_AOVertexShader.init(R"(Shaders\Deferred\SSAO\vertexShader.hlsl)"))
+	if (!m_AOVertexShader.loadCompiled(R"(CompiledShaders\Deferred\SSAO\vertexShader.cso)"))
 		return false;
-	if (!m_AOPixelShader.init(R"(Shaders\Deferred\SSAO\pixelShader.hlsl)"))
+	if (!m_AOPixelShader.loadCompiled(R"(CompiledShaders\Deferred\SSAO\pixelShader.cso)"))
 		return false;
-	if (!m_AOBlurVertexShader.init(R"(Shaders\Deferred\SSAO\blurVertexShader.hlsl)"))
+	if (!m_AOBlurVertexShader.loadCompiled(R"(CompiledShaders\Deferred\SSAO\blurVertexShader.cso)"))
 		return false;
-	if (!m_AOBlurPixelShader.init(R"(Shaders\Deferred\SSAO\blurPixelShader.hlsl)"))
+	if (!m_AOBlurPixelShader.loadCompiled(R"(CompiledShaders\Deferred\SSAO\blurPixelShader.cso)"))
 		return false;
 
 	std::uniform_real_distribution<float> randomFloats(0.0, 1.0);
@@ -96,7 +96,7 @@ bool AmbientOcclusionPass::init(float width, float height, int noAOSamples, int 
 	noiseSamplerViewDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	noiseSamplerViewDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	noiseSamplerViewDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	noiseSamplerViewDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	noiseSamplerViewDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	
 	result = D3DContext::getCurrent()->getDevice()->CreateSamplerState(&noiseSamplerViewDesc, &noiseSamplerState);
 	if (FAILED(result))

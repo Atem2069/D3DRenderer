@@ -76,6 +76,82 @@ bool VertexShader::init(std::string path)
 	return true;
 }
 
+bool VertexShader::loadCompiled(std::string shaderPath)
+{
+	HRESULT result;
+	std::wstring temp = std::wstring(shaderPath.begin(), shaderPath.end());
+	LPCWSTR filePath = temp.c_str();
+	ID3D10Blob* fileContents;
+	
+	result = D3DReadFileToBlob(filePath, &fileContents);
+	if (FAILED(result))
+	{
+		std::cout << "File : " << shaderPath << std::endl;
+		std::cout << "Failed to load compiled shader file. HRESULT " << result << std::endl;
+		return false; 
+	}
+
+	result = D3DContext::getCurrent()->getDevice()->CreateVertexShader(fileContents->GetBufferPointer(), fileContents->GetBufferSize(), nullptr, &m_vertexShader);
+	if (FAILED(result))
+	{
+		std::cout << "File : " << shaderPath << std::endl;
+		std::cout << "Failed to create shader object from bytecode.. HRESULT" << result << std::endl;
+		return false;
+	}
+
+	//...why
+	D3D11_INPUT_ELEMENT_DESC inputLayouts[5];
+
+	inputLayouts[0].AlignedByteOffset = 0;
+	inputLayouts[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputLayouts[0].InputSlot = 0;
+	inputLayouts[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayouts[0].InstanceDataStepRate = 0;
+	inputLayouts[0].SemanticIndex = 0;
+	inputLayouts[0].SemanticName = "POSITION";
+
+	inputLayouts[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	inputLayouts[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputLayouts[1].InputSlot = 0;
+	inputLayouts[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayouts[1].InstanceDataStepRate = 0;
+	inputLayouts[1].SemanticIndex = 0;
+	inputLayouts[1].SemanticName = "NORMAL";
+
+	inputLayouts[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	inputLayouts[2].Format = DXGI_FORMAT_R32G32_FLOAT;
+	inputLayouts[2].InputSlot = 0;
+	inputLayouts[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayouts[2].InstanceDataStepRate = 0;
+	inputLayouts[2].SemanticIndex = 0;
+	inputLayouts[2].SemanticName = "TEXCOORD";
+
+	inputLayouts[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	inputLayouts[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputLayouts[3].InputSlot = 0;
+	inputLayouts[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayouts[3].InstanceDataStepRate = 0;
+	inputLayouts[3].SemanticIndex = 0;
+	inputLayouts[3].SemanticName = "TANGENT";
+
+	inputLayouts[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	inputLayouts[4].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputLayouts[4].InputSlot = 0;
+	inputLayouts[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	inputLayouts[4].InstanceDataStepRate = 0;
+	inputLayouts[4].SemanticIndex = 0;
+	inputLayouts[4].SemanticName = "BITANGENT";
+
+	result = D3DContext::getCurrent()->getDevice()->CreateInputLayout(inputLayouts, 5, fileContents->GetBufferPointer(), fileContents->GetBufferSize(), &m_inputLayout);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create input layout.. HRESULT " << result << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 void VertexShader::destroy()
 {
 	m_vertexShader->Release();

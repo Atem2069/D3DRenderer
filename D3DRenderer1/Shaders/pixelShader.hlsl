@@ -32,7 +32,6 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 	float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	projCoords.x = projCoords.x / 2 + 0.5;
 	projCoords.y = projCoords.y / -2 + 0.5;	//Flipped because Direct3D does UV flipping.
-	//The Z is not transformed given that unlike OpenGL, the Z is already 0-1. No need unless you don't like shadows..
 
 	float currentDepth = projCoords.z;
 

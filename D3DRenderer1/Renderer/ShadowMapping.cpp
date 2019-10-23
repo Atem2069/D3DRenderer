@@ -3,8 +3,8 @@
 bool DirectionalShadowMap::init(float width, float height, float orthoWidth, float orthoHeight, DirectionalLight& lightInfo)
 {
 	HRESULT result;
-	std::string vertShaderPath = R"(Shaders\Shadow\vertexShader.hlsl)";
-	std::string pixShaderPath = R"(Shaders\Shadow\pixelShader.hlsl)";
+	std::string vertShaderPath = R"(CompiledShaders\Shadow\vertexShader.cso)";
+	std::string pixShaderPath = R"(CompiledShaders\Shadow\pixelShader.cso)";
 
 	m_width = width; m_height = height;
 
@@ -54,7 +54,7 @@ bool DirectionalShadowMap::init(float width, float height, float orthoWidth, flo
 	}
 
 
-	if (!m_vertexShader.init(vertShaderPath))
+	if (!m_vertexShader.loadCompiled(vertShaderPath))
 		return false;
 
 	m_shadowCamera = {};
