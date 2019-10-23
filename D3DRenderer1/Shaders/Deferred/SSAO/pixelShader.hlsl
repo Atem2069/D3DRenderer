@@ -1,10 +1,5 @@
-struct VS_OUT
-{
-	float4 position : SV_POSITION;
-	float2 texcoord : TEXCOORD0;
-	matrix projection : TEXCOORD1;
-	matrix view : TEXCOORD5;
-};
+#include "../../common.hlsli"
+
 
 SamplerState samplerState : register(s0);
 Texture2D fragpos : register(t3);	//Only need a few textures.
@@ -21,13 +16,7 @@ cbuffer kernels : register(b2)
 
 cbuffer PerFrameFlags : register(b1)
 {
-	int doFXAA;
-	int doSSAO;
-	int doSSR;
-	int doTexturing;
-	float ssaoRadius;
-	int kernelSize;
-	int ssaoPower;
+	FrameFlags frameFlags;
 };
 
 static const float near = 1.0; // projection matrix's near plane
@@ -40,7 +29,7 @@ float LinearizeDepth(float depth)
 
 float4 main(VS_OUT input) : SV_TARGET
 {
-	int numSamples = kernelSize;
+	int numSamples = frameFlags.kernelSize;
 	float4 FragPos = fragpos.Sample(samplerState,input.texcoord);
 	if (!FragPos.a)
 		clip(-1);
@@ -56,7 +45,7 @@ float4 main(VS_OUT input) : SV_TARGET
 	for (int i = 0; i < numSamples; ++i)
 	{
 		float3 m_sample = mul(samples[i].xyz,TBN);
-		m_sample = fragPos + m_sample * ssaoRadius;
+		m_sample = fragPos + m_sample * frameFlags.ssaoRadius;
 		float4 offset = float4(m_sample, 1.0);
 
 		offset = mul(input.projection,offset);
@@ -66,11 +55,11 @@ float4 main(VS_OUT input) : SV_TARGET
 		offset.z = offset.z;
 		float4 sampleCoord = fragpos.Sample(samplerState, offset.xy);
 		float sampleDepth = sampleCoord.z * sampleCoord.w;
-		float rangeCheck = smoothstep(0.0, 1.0, ssaoRadius / abs(fragPos.z - sampleDepth));
+		float rangeCheck = smoothstep(0.0, 1.0, frameFlags.ssaoRadius / abs(fragPos.z - sampleDepth));
 		occlusion += (sampleDepth >= m_sample.z + 0.0006 ? 0.0 : 1.0) *rangeCheck;
 	}
 
 	occlusion = 1.0 - (occlusion / (float)numSamples);
-	occlusion = pow(occlusion, ssaoPower);
+	occlusion = pow(occlusion, frameFlags.ssaoPower);
 	return float4(occlusion, occlusion, occlusion, 1.0f);
 }

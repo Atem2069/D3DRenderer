@@ -1,22 +1,5 @@
-struct VS_INPUT
-{
-	float3 position : POSITION;
-	float3 normal : NORMAL;
-	float2 uv : TEXCOORD;
-	float3 tangent : TANGENT;
-	float3 bitangent : BITANGENT;
-};
+#include "..\common.hlsli"
 
-struct VS_OUT
-{
-	float4 position : SV_POSITION;
-	float3 normal : NORMAL0;
-	float3 campos : NORMAL1;
-	float3 fragpos : NORMAL2;
-	float4 fragposviewspace : NORMAL3;
-	float3 normalviewspace : NORMAL4;
-	float2 texCoord : TEXCOORD0;
-};
 
 cbuffer camera : register(b0)
 {
@@ -81,7 +64,7 @@ VS_OUT main(VS_INPUT input)
 	matrix translationMatrix = mul(projection, view);
 	translationMatrix = mul(translationMatrix, model);
 	matrix shadowTransMatrix = mul(shadowProj, shadowView);
-	VS_OUT output;
+	VS_OUT output = (VS_OUT)0;
 	output.position = mul(translationMatrix, float4(input.position, 1.0f));
 	output.normal = mul((float3x3)inverseModel, input.normal);
 	output.campos = (float3)campos;
@@ -90,6 +73,6 @@ VS_OUT main(VS_INPUT input)
 	output.normalviewspace = mul(mul((float3x3)view, (float3x3)inverseModel), input.normal);
 	//float3x3 normalmatrix = (float3x3)transpose(inverse(mul(model,view)));
 	//output.normalviewspace = mul(normalmatrix,input.normal);
-	output.texCoord = input.uv;
+	output.texcoord = input.texcoord;
 	return output;
 }

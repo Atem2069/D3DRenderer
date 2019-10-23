@@ -1,8 +1,4 @@
-struct VS_OUT
-{
-	float4 position : SV_POSITION;
-	float2 texcoord : TEXCOORD0;
-};
+#include "../../common.hlsli"
 
 SamplerState samplerState : register(s0);
 Texture2D inputTex : register(t0);
@@ -10,12 +6,7 @@ Texture2D ssr : register(t1);
 
 cbuffer PerFrameFlags : register(b1)
 {
-	int doFXAA;
-	int doSSAO;
-	int doSSR;
-	int doTexturing;
-	float ssaoRadius;
-	int kernelSize;
+	FrameFlags frameFlags;
 }
 
 float4 FXAA(VS_OUT input)
@@ -76,7 +67,7 @@ float4 FXAA(VS_OUT input)
 float4 main(VS_OUT input) : SV_TARGET
 {
 	float4 result = 1.0f;
-	if (doFXAA == 1)
+	if (frameFlags.doFXAA == 1)
 		result = FXAA(input);
 	else
 		result.rgb = inputTex.Sample(samplerState, input.texcoord).rgb;

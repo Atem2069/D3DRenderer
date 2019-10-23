@@ -1,9 +1,4 @@
-struct VS_OUT
-{
-	float4 position : SV_POSITION;
-	float2 texcoord : TEXCOORD0;
-};
-
+#include "../../common.hlsli"
 SamplerState samplerState : register(s0);
 Texture2D inputTex : register(t0);
 

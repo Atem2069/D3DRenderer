@@ -1,4 +1,4 @@
-
+#include "..\common.hlsli"
 SamplerState samplerState : register(s0);
 Texture2D albedoTex : register(t0);
 Texture2D fragposTex : register(t1);
@@ -7,14 +7,6 @@ Texture2D AOTexture : register(t5);
 
 Texture2D shadowTex : register(t4);
 SamplerComparisonState shadowSampler : register(s1);
-
-struct VS_OUT
-{
-	float4 position : SV_POSITION;
-	float2 texcoord : TEXCOORD0;
-	float3 campos : TEXCOORD1;
-	matrix shadowCam : TEXCOORD2;
-};
 
 struct DirectionalLight
 {
@@ -30,12 +22,7 @@ cbuffer LightInformation : register(b0)
 
 cbuffer PerFrameFlags : register(b1)
 {
-	int doFXAA;
-	int doSSAO;
-	int doSSR;
-	int doTexturing;
-	float ssaoRadius;
-	int kernelSize;
+	FrameFlags frameFlags;
 };
 
 float4 MSAAResolve(Texture2DMS<float4> inputTexture, int numSamples, uint2 pixelTexCoords)
@@ -65,16 +52,16 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 	float2 texelSize;
 	shadowTex.GetDimensions(texelSize.x, texelSize.y);
 	texelSize = 1.0f / texelSize;
-	for (int x = -2; x <= 2; ++x)
+	for (int x = -1; x <= 1; ++x)
 	{
-		for (int y = -2; y <= 2; ++y)
+		for (int y = -1; y <= 1; ++y)
 		{
 			//float pcfDepth = shadowTex.Sample(shadowSampler, projCoords.xy + float2(x, y) * texelSize).r;
 			//shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 			shadow += shadowTex.SampleCmpLevelZero(shadowSampler, projCoords.xy + float2(x, y)*texelSize, currentDepth - bias).r;
 		}
 	}
-	shadow /= 25.0;
+	shadow /= 9.0;
 	return shadow;
 }
 
@@ -87,7 +74,7 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float4 normal = normalTex.Sample(samplerState, input.texcoord);
 	float3 AOFactor = AOTexture.Sample(samplerState, input.texcoord).rgb;
 	float4 fragposlightspace = mul(input.shadowCam, float4(fragpos.xyz, 1.0f));
-	if (!doSSAO)
+	if (!frameFlags.doSSAO)
 		AOFactor = 1.0f;
 	float3 ambient = 0.25f * light.color.xyz * AOFactor;
 

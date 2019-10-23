@@ -164,11 +164,11 @@ int main()
 	m_frameFlags.doSSAO = 1;
 	m_frameFlags.doSSR = 1;
 	m_frameFlags.doTexturing = 1;
-	m_frameFlags.ssaoRadius = 50.0f;
+	m_frameFlags.ssaoRadius = 5.0f;
 	m_frameFlags.m_kernelSize = 64;
 	m_frameFlags.m_ssaoPower = 2;
-	m_frameFlags.coarseStepCount = 64;
-	m_frameFlags.fineStepCount = 64;
+	m_frameFlags.coarseStepCount = 32;
+	m_frameFlags.fineStepCount = 32;
 	m_frameFlags.coarseStepIncrease = 1.125f;
 	m_frameFlags.tolerance = 999.0f;
 	m_frameFlags.ssrMetallic = 1.0f;

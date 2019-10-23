@@ -1,12 +1,4 @@
-struct VS_INPUT
-{
-	float3 position : POSITION;
-};
-
-struct VS_OUT
-{
-	float4 position : SV_POSITION;
-};
+#include "..\common.hlsli"
 
 cbuffer shadowCamera : register(b0)
 {
@@ -24,11 +16,9 @@ cbuffer object : register(b1)
 
 VS_OUT main(VS_INPUT input)
 {
-	VS_OUT output;
-	//matrix translationMatrix = mul(projectionView, model);
+	VS_OUT output = (VS_OUT)0;
 	matrix transMatrix = mul(shadowProj, shadowView);
 	transMatrix = mul(transMatrix, model);
 	output.position = mul(transMatrix, float4(input.position, 1.0f));
-	//output.position = mul(float4(input.position, 1.0f), projectionView);
 	return output;
 }

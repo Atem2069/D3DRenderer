@@ -1,3 +1,4 @@
+#include "..\..\common.hlsli"
 SamplerState samplerState : register(s0);
 Texture2D gFinalImage : register(t5);
 Texture2D gPosition : register(t3);
@@ -5,30 +6,9 @@ Texture2D gNormal: register(t4);
 Texture2D ColorBuffer : register(t0);
 Texture2D projDepth : register(t6);
 
-
-struct VS_OUT
-{
-	float4 position : SV_POSITION;
-	float2 TexCoords : TEXCOORD0;
-	float4x4 projection : TEXCOORD1;
-	float4x4 view : TEXCOORD5;
-};
-
 cbuffer PerFrameFlags : register(b1)
 {
-	int doFXAA;
-	int doSSAO;
-	int doSSR;
-	int doTexturing;
-	float ssaoRadius;
-	int kernelSize;
-	int ssaoPower;
-	uint coarseStepCount;
-	float coarseStepIncrease;
-	uint fineStepCount;
-	float tolerance;
-	float ssrReflectiveness;
-	float ssrMetallic;
+	FrameFlags frameFlags;
 };
 
 
@@ -45,7 +25,7 @@ float4 SSRBinarySearch(in float3 origin, in float3 direction, float4x4 projectio
 {
 	float fDepth;
 
-	for (int i = 0; i < fineStepCount; i++)
+	for (int i = 0; i < frameFlags.fineStepCount; i++)
 	{
 		float4 vProjectedCoord = mul(projection,float4(origin, 1.0f));
 		vProjectedCoord.xy /= vProjectedCoord.w;
@@ -70,14 +50,14 @@ float4 SSRBinarySearch(in float3 origin, in float3 direction, float4x4 projectio
 	//fDepth = projection._43 / (fDepth - projection._33);
 	float fDepthDiff = origin.z - fDepth;
 
-	return float4(vProjectedCoord.xy, fDepth, abs(fDepthDiff) < tolerance ? 1.0f : 0.0f);
+	return float4(vProjectedCoord.xy, fDepth, abs(fDepthDiff) < frameFlags.tolerance ? 1.0f : 0.0f);
 }
 
 float4 SSRRayMarch(inout float3 origin, in float3 direction, float4x4 projection)
 {
 	float fDepth;
 
-	for (int i = 0; i < coarseStepCount; i++)
+	for (int i = 0; i < frameFlags.coarseStepCount; i++)
 	{
 		origin += direction;
 
@@ -93,7 +73,7 @@ float4 SSRRayMarch(inout float3 origin, in float3 direction, float4x4 projection
 		if (fDepthDiff > 0.0f)
 			return SSRBinarySearch(origin,direction,projection);
 
-		direction *= coarseStepIncrease;
+		direction *= frameFlags.coarseStepIncrease;
 
 	}
 
@@ -108,14 +88,14 @@ float3 ComputeF0(in float4 baseColor, in float reflectance, in float metalness)
 float4 main(VS_OUT input) : SV_TARGET
 {
 	//const float2 uv = (DTid.xy + 0.5f) * xPPResolution_rcp;
-	const float2 uv = input.TexCoords;
+	const float2 uv = input.texcoord;
 
-	if (doSSR)
+	if (frameFlags.doSSR)
 	{
 		float3 P = gPosition.Load(int3(input.position.xy, 0)).xyz;
 		float3 N = gNormal.Load(int3(input.position.xy, 0)).xyz;;
 
-		float3 f0 = ComputeF0(ColorBuffer.Load(int3(input.position.xy, 0)), ssrReflectiveness, ssrMetallic);
+		float3 f0 = ComputeF0(ColorBuffer.Load(int3(input.position.xy, 0)), frameFlags.ssrReflectiveness, frameFlags.ssrMetallic);
 
 		float3 vViewPos = P;
 		float3 vViewNor = N;
