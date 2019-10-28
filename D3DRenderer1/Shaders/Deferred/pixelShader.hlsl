@@ -15,7 +15,7 @@ cbuffer PerFrameFlags : register(b1)
 };
 
 Texture2D albedoTex : register(t0);
-Texture2D normalMap : register(t1);
+Texture2D specularMap : register(t1);
 SamplerState samplerState : register(s0);
 
 PS_OUT main(VS_OUT input)
@@ -28,6 +28,7 @@ PS_OUT main(VS_OUT input)
 		clip(-1);
 	if (!width || !frameFlags.doTexturing)
 		output.albedo = 1;
+	output.albedo.w = specularMap.Sample(samplerState, input.texcoord).r; //alpha component of albedo map is the specular color.
 	output.fragpos = float4(input.fragpos, 1.0f);
 	float3 norm = normalize(input.normal.xyz);
 	output.normal = float4(norm, 1.0f);

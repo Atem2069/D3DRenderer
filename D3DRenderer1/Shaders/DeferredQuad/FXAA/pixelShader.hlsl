@@ -15,10 +15,10 @@ float4 FXAA(VS_OUT input)
 	float FXAA_REDUCE_MUL = 1.0 / 8.0;
 	float FXAA_REDUCE_MIN = 1.0 / 128.0;
 
-	float3 rgbNW = inputTex.Sample(samplerState, input.texcoord + (float2(-1.0, -1.0) / float2(1600, 900))).xyz;
-	float3 rgbNE = inputTex.Sample(samplerState, input.texcoord + (float2(1.0, -1.0) / float2(1600, 900))).xyz;
-	float3 rgbSW = inputTex.Sample(samplerState, input.texcoord + (float2(-1.0, 1.0) / float2(1600, 900))).xyz;
-	float3 rgbSE = inputTex.Sample(samplerState, input.texcoord + (float2(1.0, 1.0) / float2(1600, 900))).xyz;
+	float3 rgbNW = inputTex.Sample(samplerState, input.texcoord + (float2(-1.0, -1.0) / frameFlags.resolution)).xyz;
+	float3 rgbNE = inputTex.Sample(samplerState, input.texcoord + (float2(1.0, -1.0) / frameFlags.resolution)).xyz;
+	float3 rgbSW = inputTex.Sample(samplerState, input.texcoord + (float2(-1.0, 1.0) / frameFlags.resolution)).xyz;
+	float3 rgbSE = inputTex.Sample(samplerState, input.texcoord + (float2(1.0, 1.0) / frameFlags.resolution)).xyz;
 	float3 rgbM = inputTex.Sample(samplerState, input.texcoord).xyz;
 
 	float3 luma = float3(0.299, 0.587, 0.114);
@@ -43,7 +43,7 @@ float4 FXAA(VS_OUT input)
 
 	dir = min(float2(FXAA_SPAN_MAX, FXAA_SPAN_MAX),
 		max(float2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
-			dir * rcpDirMin)) / float2(1600, 900);
+			dir * rcpDirMin)) / frameFlags.resolution;
 
 	float3 rgbA = (1.0 / 2.0) * (inputTex.Sample(samplerState, input.texcoord + dir * (1.0 / 3.0 - 0.5)).xyz +
 		inputTex.Sample(samplerState, input.texcoord + dir * (2.0 / 3.0 - 0.5)).xyz);

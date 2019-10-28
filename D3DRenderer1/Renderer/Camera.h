@@ -7,6 +7,7 @@ struct cb_perspectiveCamera
 	XMMATRIX projection;
 	XMMATRIX view;
 	XMVECTOR position;
+	XMMATRIX orthoVoxel;
 };
 
 struct perspectiveCameraChangeInfo

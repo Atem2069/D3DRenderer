@@ -9,7 +9,7 @@ bool PerspectiveCamera::init(float width, float height, float fovDeg, float minD
 	cameraChangeInfo.up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	m_cameraBuffer.projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fovDeg), width / height, minDepth, maxDepth);
 	m_cameraBuffer.view = XMMatrixLookAtLH(cameraChangeInfo.position, cameraChangeInfo.lookAt, cameraChangeInfo.up);
-
+	m_cameraBuffer.orthoVoxel = XMMatrixOrthographicLH(256, 256, 1.0f, 100.0f);
 	//Const buffer descriptor etc
 	D3D11_BUFFER_DESC constBufferDesc = {};
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;

@@ -20,7 +20,7 @@ cbuffer PerFrameFlags : register(b1)
 };
 
 static const float near = 1.0; // projection matrix's near plane
-static const float far = 20000.0; // projection matrix's far plane
+static const float far = 2000.0; // projection matrix's far plane
 float LinearizeDepth(float depth)
 {
 	float z = depth *2.0 - 1.0; // back to NDC (not in d3d11)
@@ -31,11 +31,11 @@ float4 main(VS_OUT input) : SV_TARGET
 {
 	int numSamples = frameFlags.kernelSize;
 	float4 FragPos = fragpos.Sample(samplerState,input.texcoord);
-	if (!FragPos.a)
+	if (!normal.Sample(samplerState,input.texcoord).a)
 		clip(-1);
 	float3 fragPos = FragPos.xyz;
 	float3 norm = normal.Sample(samplerState, input.texcoord);
-	float2 randomSamplingCoords = float2(1600.0f / 4.0f, 900.0f / 4.0f);
+	float2 randomSamplingCoords = float2(frameFlags.resolution.x / 4.0f, frameFlags.resolution.y / 4.0f);
 	float3 randomVec = noiseTex.Sample(aoTexState, input.texcoord*randomSamplingCoords).rgb;
 	float3 tangent = normalize(randomVec - norm * dot(randomVec, norm));
 	float3 bitangent = cross(norm, tangent);

@@ -100,7 +100,7 @@ bool Object::init(std::string path)
 				}
 			}
 
-			if (material->GetTextureCount(aiTextureType_DISPLACEMENT) > 0)
+			if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
 			{
 				bool loadTexture = true;
 				for (int j = 0; j < i; j++)
@@ -108,41 +108,17 @@ bool Object::init(std::string path)
 					if (m_meshes[j].m_material.m_materialIndex == currentMesh->mMaterialIndex)
 					{
 						loadTexture = false;
-						tempMesh.m_material.m_normalMap = m_meshes[j].m_material.m_normalMap;
+						tempMesh.m_material.m_specularMap = m_meshes[j].m_material.m_specularMap;
 					}
 				}
 
 				if (loadTexture)
 				{
 					aiString texPath;
-					material->GetTexture(aiTextureType_DISPLACEMENT, 0, &texPath);
+					material->GetTexture(aiTextureType_SPECULAR, 0, &texPath);
 					std::string texFile = texPath.C_Str();
 					std::string texturePath = dir + texFile;
-					std::cout << texturePath << std::endl;
-					tempMesh.m_material.m_normalMap.init(texturePath);
-				}
-			}
-
-			if (material->GetTextureCount(aiTextureType_HEIGHT) > 0)
-			{
-				bool loadTexture = true;
-				for (int j = 0; j < i; j++)
-				{
-					if (m_meshes[j].m_material.m_materialIndex == currentMesh->mMaterialIndex)
-					{
-						loadTexture = false;
-						tempMesh.m_material.m_normalMap = m_meshes[j].m_material.m_normalMap;
-					}
-				}
-
-				if (loadTexture)
-				{
-					aiString texPath;
-					material->GetTexture(aiTextureType_HEIGHT, 0, &texPath);
-					std::string texFile = texPath.C_Str();
-					std::string texturePath = dir + texFile;
-					std::cout << texturePath << std::endl;
-					tempMesh.m_material.m_normalMap.init(texturePath);
+					tempMesh.m_material.m_specularMap.init(texturePath);
 				}
 			}
 
@@ -251,7 +227,7 @@ void Object::draw()
 	for (int i = 0; i < m_meshes.size(); i++)
 	{
 		m_meshes[i].m_material.m_albedoTexture.bind(0);
-		m_meshes[i].m_material.m_normalMap.bind(1);
+		m_meshes[i].m_material.m_specularMap.bind(1);
 		deviceContext->DrawIndexed(m_meshes[i].m_numElements, m_meshes[i].m_baseElement, m_meshes[i].m_baseVertex);
 	}
 }

@@ -8,6 +8,9 @@ Texture2D AOTexture : register(t5);
 Texture2D shadowTex : register(t4);
 SamplerComparisonState shadowSampler : register(s1);
 
+SamplerState voxelSampler : register(s2);
+Texture3D voxelTex : register(t6);
+
 struct DirectionalLight
 {
 	float4 color;
@@ -76,19 +79,19 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float4 fragposlightspace = mul(input.shadowCam, float4(fragpos.xyz, 1.0f));
 	if (!frameFlags.doSSAO)
 		AOFactor = 1.0f;
-	float3 ambient = 0.25f * light.color.xyz * AOFactor;
+	float3 ambient = 0.3f * light.color.xyz * AOFactor;
 
 	float3 lightDir = normalize(-light.direction.xyz);
 	float3 norm = normal.xyz;
 
-	float diffuseIntensity = 1.0f;
+	float diffuseIntensity = 1.5f;
 	float diff = max(dot(norm, lightDir), 0.0f) * diffuseIntensity;
 	float3 diffuse = light.color.xyz * diff;
 
 	float3 viewDir = normalize(input.campos - fragpos.xyz);
 	float3 halfwayDir = normalize(lightDir + viewDir);
 
-	float specularIntensity = 1.5f;
+	float specularIntensity = 1.5f * albedo.w;
 	float spec = pow(max(dot(norm, halfwayDir), 0.0f), light.specularPower) * specularIntensity;
 	float3 specular = light.color.xyz * spec;
 

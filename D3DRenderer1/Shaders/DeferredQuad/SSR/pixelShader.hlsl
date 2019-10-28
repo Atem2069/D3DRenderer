@@ -13,12 +13,11 @@ cbuffer PerFrameFlags : register(b1)
 
 
 static const float near = 1.0f; // projection matrix's near plane
-static const float far = 2000.0f; // projection matrix's far plane 
+static const float far = 10000.0f; // projection matrix's far plane 
 float LinearizeDepth(float depth)
 {
-	float z = depth * 2.0 - 1.0; // back to NDC (not in d3d11)
+	float z = depth * 2.0 - 1.0; // back to NDC 
 	return (2.0 * near * far) / (far + near - z * (far - near));
-	//return (2.0f * near) / (far + near - z * (far - near));
 }
 
 float4 SSRBinarySearch(in float3 origin, in float3 direction, float4x4 projection)
@@ -89,13 +88,13 @@ float4 main(VS_OUT input) : SV_TARGET
 {
 	//const float2 uv = (DTid.xy + 0.5f) * xPPResolution_rcp;
 	const float2 uv = input.texcoord;
-
+	float spec = ColorBuffer.Sample(samplerState, uv).w;	//Shininess is encoded into the w of the color buffer.
 	if (frameFlags.doSSR)
 	{
 		float3 P = gPosition.Load(int3(input.position.xy, 0)).xyz;
 		float3 N = gNormal.Load(int3(input.position.xy, 0)).xyz;;
 
-		float3 f0 = ComputeF0(ColorBuffer.Load(int3(input.position.xy, 0)), frameFlags.ssrReflectiveness, frameFlags.ssrMetallic);
+		float3 f0 = ComputeF0(ColorBuffer.Load(int3(input.position.xy, 0)), spec, frameFlags.ssrMetallic);
 
 		float3 vViewPos = P;
 		float3 vViewNor = N;
@@ -104,7 +103,7 @@ float4 main(VS_OUT input) : SV_TARGET
 
 		float4 vCoords = SSRRayMarch(vHitPos, R, input.projection);
 
-		float2 vCoordsEdgeFact = float2(1, 1) - pow(saturate(abs(vCoords.xy - float2(0.5f, 0.5f)) * 2), 1);
+		float2 vCoordsEdgeFact = float2(1, 1) - pow(saturate(abs(vCoords.xy - float2(0.5f, 0.5f)) * 2), 8);
 		float fScreenEdgeFactor = saturate(min(vCoordsEdgeFact.x, vCoordsEdgeFact.y));
 
 		//if (!bInsideScreen(vCoords.xy))

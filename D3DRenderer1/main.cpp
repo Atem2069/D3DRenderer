@@ -16,6 +16,7 @@
 #include "Renderer/ConstantBuffer.h"
 #include "Renderer/ShadowMapping.h"
 #include "Renderer/AmbientOcclusion.h"
+#include "Renderer/Voxelization.h"
 
 //ImGui
 #include <imgui.h>
@@ -34,6 +35,7 @@ int MultisampleQuality = 0;
 
 struct FrameFlags
 {
+	XMFLOAT2 resolution;
 	int doFXAA;
 	int doSSAO;
 	int doSSR;
@@ -47,7 +49,7 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
-	int unusedalignment[3];
+	int unusedalignment;
 };
 
 int main()
@@ -93,12 +95,12 @@ int main()
 		return -1;
 
 	PerspectiveCamera m_camera;
-	if (!m_camera.init(WIDTH, HEIGHT, 45.0f, 1.0f, 1000.0f))
+	if (!m_camera.init(WIDTH, HEIGHT, 60.0f, 1.0f, 10000.0f))
 		return -1;
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
-	m_object.init(R"(Models\sponzav2\sponza.obj)");
+	m_object.init(R"(Models\sponza\sponza.obj)");
 	m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
@@ -160,13 +162,14 @@ int main()
 		return -1;
 
 	FrameFlags m_frameFlags = {};
+	m_frameFlags.resolution = XMFLOAT2(1600, 900);
 	m_frameFlags.doFXAA = 1;
 	m_frameFlags.doSSAO = 1;
 	m_frameFlags.doSSR = 1;
 	m_frameFlags.doTexturing = 1;
-	m_frameFlags.ssaoRadius = 5.0f;
+	m_frameFlags.ssaoRadius = 10.0f;
 	m_frameFlags.m_kernelSize = 64;
-	m_frameFlags.m_ssaoPower = 2;
+	m_frameFlags.m_ssaoPower = 1;
 	m_frameFlags.coarseStepCount = 32;
 	m_frameFlags.fineStepCount = 32;
 	m_frameFlags.coarseStepIncrease = 1.125f;
@@ -191,6 +194,9 @@ int main()
 	RenderPass m_ssrRenderPass;
 	if (!m_ssrRenderPass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0))
 		return -1;
+
+	SceneVoxelizer m_voxelizer;
+	m_voxelizer.init();
 
 	//For camera
 	float pitch = 0, yaw = 0;
@@ -250,12 +256,25 @@ int main()
 
 		ImGui::Begin("Deferred Renderer Debug");
 		{
+			ImGui::Image((ImTextureID)m_deferredRenderPass.getDepthBufferView(), ImVec2(320, 180));
 			for (int i = 0; i < m_deferredRenderPass.m_noRenderTargets; i++)
 				ImGui::Image((ImTextureID)m_deferredRenderPass.getRenderBufferViews()[i], ImVec2(320, 180));
 			ImGui::Image((ImTextureID)m_ambientOcclusionPass.getAOTexture(), ImVec2(320, 180));
 			ImGui::Image((ImTextureID)m_ssrRenderPass.getRenderBufferView(), ImVec2(320, 180));
 		}
 		ImGui::End();
+		//CPU Updating
+		m_lightUploadBuffer.update((void*)&m_basicLight, sizeof(DirectionalLight));
+		m_flagsBuffer.update((void*)&m_frameFlags, sizeof(FrameFlags));
+		m_camera.update();
+
+
+		//Voxelization and shadowmap render passes - these alter the viewport so best to do first things first!
+		m_voxelizer.beginVoxelizationPass();
+		m_object.draw();
+		m_object2.draw();
+		m_object3.draw();
+		m_voxelizer.endVoxelizationPass();
 
 
 		m_shadowMap.beginFrame(m_basicLight);
@@ -270,12 +289,8 @@ int main()
 		m_deferredRenderPass.begin(0.564f, 0.8f, 0.976f, 0.0f);
 		m_vertexShader.bind();
 		m_pixelShader.bind();
-		//CPU Updating
-		m_camera.update();
-		m_camera.bind(0);
-		m_lightUploadBuffer.update((void*)&m_basicLight, sizeof(DirectionalLight));
-		m_flagsBuffer.update((void*)&m_frameFlags, sizeof(FrameFlags));
 
+		m_camera.bind(0);
 
 		//GPU Drawing
 		m_object.draw();
@@ -299,12 +314,14 @@ int main()
 		m_qPixelShader.bind();
 		if(m_frameFlags.doSSAO)
 			m_ambientOcclusionPass.bindAOTexture(0, 5);
+		m_voxelizer.bindVoxelTexture(6, 2);
 		m_deferredRenderPass.bindRenderTargets(0, 0);
 		m_shadowMap.bindDepthTexturePS(1, 4);
 		m_fsQuad.draw();
 		m_shadowMap.unbindDepthTexturePS(4);
 		m_deferredRenderPass.unbindRenderTargets(0);	//Necessary to stop undefined behaviour
 		m_ambientOcclusionPass.unbindAOTexture(5);
+		m_voxelizer.unbindVoxelTexture(6);
 
 
 		//Doing screenspace reflections!!!

@@ -37,6 +37,9 @@
     <Filter Include="Shaders\Deferred Quad %28Resolving Pass%29\Screenspace Reflections">
       <UniqueIdentifier>{30e28412-fe27-4d80-bb07-b73f0953ec6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Voxelization">
+      <UniqueIdentifier>{aac6a6c8-cf79-4b50-ae35-6f7ba91586e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -91,6 +94,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\AmbientOcclusion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Voxelization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -152,6 +158,9 @@
     <ClInclude Include="Renderer\AmbientOcclusion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\Voxelization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\pixelShader.hlsl">
@@ -201,6 +210,12 @@
     </FxCompile>
     <FxCompile Include="Shaders\DeferredQuad\SSR\vertexShader.hlsl">
       <Filter>Shaders\Deferred Quad %28Resolving Pass%29\Screenspace Reflections</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Voxelization\vertexShader.hlsl">
+      <Filter>Shaders\Voxelization</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Voxelization\pixelShader.hlsl">
+      <Filter>Shaders\Voxelization</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

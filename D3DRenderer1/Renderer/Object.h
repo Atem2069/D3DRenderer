@@ -18,7 +18,7 @@ struct ObjectTransformation
 struct Material
 {
 	Texture2D m_albedoTexture;
-	Texture2D m_normalMap;
+	Texture2D m_specularMap;
 	int m_materialIndex = 0;
 };
 

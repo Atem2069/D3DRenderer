@@ -144,6 +144,7 @@
     <ClCompile Include="Renderer\ShadowMapping.cpp" />
     <ClCompile Include="Renderer\Texturing.cpp" />
     <ClCompile Include="Renderer\VertexShader.cpp" />
+    <ClCompile Include="Renderer\Voxelization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extlib\imgui-master\imconfig.h" />
@@ -165,6 +166,7 @@
     <ClInclude Include="Renderer\ShadowMapping.h" />
     <ClInclude Include="Renderer\Texturing.h" />
     <ClInclude Include="Renderer\VertexShader.h" />
+    <ClInclude Include="Renderer\Voxelization.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DeferredQuad\FXAA\pixelShader.hlsl">
@@ -247,6 +249,16 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\Voxelization\pixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)\CompiledShaders\Voxelization\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\Voxelization\vertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)\CompiledShaders\Voxelization\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,9 +2,14 @@
 SamplerState samplerState : register(s0);
 Texture2D inputTex : register(t0);
 
+cbuffer PerFrameFlags : register(b1)
+{
+	FrameFlags frameFlags;
+}
+
 float4 main(VS_OUT input) : SV_TARGET
 {
-	float2 texelSize = 1.0 / float2(1600,900);
+	float2 texelSize = 1.0 / frameFlags.resolution;
 	float result = 0.0;
 	for (int x = -2; x < 2; ++x)
 	{
