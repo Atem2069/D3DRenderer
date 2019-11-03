@@ -99,6 +99,9 @@
     <ClCompile Include="Renderer\Voxelization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\GeometryShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer\BaseRenderer.h">
@@ -161,6 +164,9 @@
     <ClInclude Include="Renderer\Voxelization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\GeometryShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\pixelShader.hlsl">
@@ -215,6 +221,9 @@
       <Filter>Shaders\Voxelization</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Voxelization\pixelShader.hlsl">
+      <Filter>Shaders\Voxelization</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Voxelization\geometryShader.hlsl">
       <Filter>Shaders\Voxelization</Filter>
     </FxCompile>
   </ItemGroup>

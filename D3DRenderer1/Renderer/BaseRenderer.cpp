@@ -9,13 +9,17 @@ bool D3D::init(int width, int height, bool fullscreen, HWND hwnd, int MSAALevels
 	CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
 
 	//Create D3D Device
-	D3D_FEATURE_LEVEL featureLevels[1] = { D3D_FEATURE_LEVEL_11_0 };
+	D3D_FEATURE_LEVEL featureLevels[1] = { D3D_FEATURE_LEVEL_12_0 };
 	result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, featureLevels, 1, D3D11_SDK_VERSION, &m_device, nullptr, &m_deviceContext);
 	if (FAILED(result))
 	{
 		std::cout << "Failed to create D3D11 Device. HRESULT " << result << std::endl;
 		return false;
 	}
+
+	//Create d3d 11.3 device
+	m_device->QueryInterface(__uuidof(ID3D11Device3), (void**)&m_d3d113device);
+	m_deviceContext->QueryInterface(__uuidof(ID3D11DeviceContext3), (void**)&m_d3d113deviceContext);
 	UINT quality;
 	m_device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, MSAALevels, &quality);
 	MSAAQuality = quality - 1;
@@ -139,14 +143,14 @@ bool D3D::init(int width, int height, bool fullscreen, HWND hwnd, int MSAALevels
 	return true;
 }
 
-ID3D11Device* D3D::getDevice()
+ID3D11Device3* D3D::getDevice()
 {
-	return m_device;
+	return m_d3d113device;
 }
 
-ID3D11DeviceContext* D3D::getDeviceContext()
+ID3D11DeviceContext3* D3D::getDeviceContext()
 {
-	return m_deviceContext;
+	return m_d3d113deviceContext;
 }
 
 ID3D11RenderTargetView* D3D::getBackBuffer()

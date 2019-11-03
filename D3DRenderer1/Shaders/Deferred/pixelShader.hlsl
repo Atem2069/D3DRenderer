@@ -29,6 +29,9 @@ PS_OUT main(VS_OUT input)
 	if (!width || !frameFlags.doTexturing)
 		output.albedo = 1;
 	output.albedo.w = specularMap.Sample(samplerState, input.texcoord).r; //alpha component of albedo map is the specular color.
+	specularMap.GetDimensions(width, height);
+	if (!width)	//If no spec tex is loaded..
+		output.albedo.w = 1.0f;
 	output.fragpos = float4(input.fragpos, 1.0f);
 	float3 norm = normalize(input.normal.xyz);
 	output.normal = float4(norm, 1.0f);

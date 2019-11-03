@@ -49,7 +49,9 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
-	int unusedalignment;
+	float iblConeRatio;
+	float iblMaxDist;
+	int unusedAlignment[3];
 };
 
 int main()
@@ -100,8 +102,8 @@ int main()
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
-	m_object.init(R"(Models\sponza\sponza.obj)");
-	m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
+	m_object.init(R"(Models\powerplant\powerplant.obj)");
+	//m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
 	//m_object2.scale(XMVectorSet(10, 10, 10, 0));
@@ -123,7 +125,7 @@ int main()
 	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, MultisampleQuality))
 		return -1;
 
-	DXGI_FORMAT formats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};;
+	DXGI_FORMAT formats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R16G16B16A16_FLOAT,DXGI_FORMAT_R16G16B16A16_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};;
 	DeferredRenderPass m_deferredRenderPass;
 	if (!m_deferredRenderPass.init(WIDTH, HEIGHT, 5, formats, MultisampleLevel,MultisampleQuality))
 		return -1;
@@ -138,8 +140,9 @@ int main()
 	if (!m_lightUploadBuffer.init(&m_basicLight, sizeof(DirectionalLight)))
 		return -1;
 
+	XMFLOAT2 shadowDimensions = XMFLOAT2(410, 410);
 	DirectionalShadowMap m_shadowMap;
-	if (!m_shadowMap.init(4096,4096, 410,410, m_basicLight))
+	if (!m_shadowMap.init(4096,4096, shadowDimensions.x,shadowDimensions.y, m_basicLight))
 		return -1;
 
 	
@@ -176,6 +179,8 @@ int main()
 	m_frameFlags.tolerance = 999.0f;
 	m_frameFlags.ssrMetallic = 1.0f;
 	m_frameFlags.ssrReflectiveness = 1.0f;
+	m_frameFlags.iblConeRatio = 1.0f;
+	m_frameFlags.iblMaxDist = 1.0f;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
@@ -229,8 +234,11 @@ int main()
 			ImGui::DragFloat("SSAO Radius", (float*)&m_frameFlags.ssaoRadius);
 			ImGui::DragInt("SSAO Kernel Size", (int*)&m_frameFlags.m_kernelSize);
 			ImGui::DragInt("SSAO Power", (int*)&m_frameFlags.m_ssaoPower);
+			ImGui::DragFloat("iblConeRatio", (float*)&m_frameFlags.iblConeRatio);
+			ImGui::DragFloat("iblMaxDist", (float*)&m_frameFlags.iblMaxDist);
 			if (ImGui::RadioButton("Update SSAO Kernels", true))
 				m_ambientOcclusionPass.updateKernel(m_frameFlags.m_kernelSize);
+			ImGui::DragFloat2("Shadow Dimensions", (float*)&shadowDimensions);
 			ImGui::Image((ImTextureID)m_shadowMap.getDepthBufferView(), ImVec2(256, 256));
 		}
 		ImGui::End();
@@ -277,7 +285,7 @@ int main()
 		m_voxelizer.endVoxelizationPass();
 
 
-		m_shadowMap.beginFrame(m_basicLight);
+		m_shadowMap.beginFrame(m_basicLight,shadowDimensions);
 		m_object.draw();
 		m_object2.draw();
 		m_object3.draw();

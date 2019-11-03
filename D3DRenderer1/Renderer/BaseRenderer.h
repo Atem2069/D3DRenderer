@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d3d11.h>
+#include <d3d11_3.h>
 #include <iostream>
 
 #include <DirectXMath.h>
@@ -20,8 +21,8 @@ class D3D
 public:
 	bool init(int width, int height, bool fullscreen, HWND hwnd, int MSAALevels, int& MSAAQuality);
 	
-	ID3D11Device* getDevice();
-	ID3D11DeviceContext* getDeviceContext();
+	ID3D11Device3* getDevice();
+	ID3D11DeviceContext3* getDeviceContext();
 	ID3D11RenderTargetView* getBackBuffer();
 	ID3D11DepthStencilView* getDepthBuffer();
 	IDXGISwapChain* getSwapChain();
@@ -32,6 +33,8 @@ private:
 	ID3D11RasterizerState* m_rasterizerState;
 	ID3D11Device* m_device;
 	ID3D11DeviceContext* m_deviceContext;
+	ID3D11Device3* m_d3d113device;
+	ID3D11DeviceContext3* m_d3d113deviceContext;
 	ID3D11RenderTargetView* m_backBuffer;
 	ID3D11DepthStencilView* m_depthBuffer;
 	ID3D11Texture2D* m_depthStencilTex;

@@ -117,10 +117,10 @@ void DirectionalShadowMap::destroy()
 	//todo
 }
 
-void DirectionalShadowMap::beginFrame(DirectionalLight& lightInfo)
+void DirectionalShadowMap::beginFrame(DirectionalLight& lightInfo, XMFLOAT2 dimensions)
 {
 	m_shadowCamera.m_view = XMMatrixLookAtLH(XMVectorNegate(XMLoadFloat4(&lightInfo.direction)), XMLoadFloat4(&lightInfo.direction), XMVectorSet(0, 1, 0, 1));
-
+	m_shadowCamera.m_projection = XMMatrixOrthographicLH(dimensions.x, dimensions.y, 1.0f, 10000.0f);
 
 	D3DContext::getCurrent()->getDeviceContext()->OMSetRenderTargets(0, nullptr, m_depthStencilView);
 	D3DContext::getCurrent()->getDeviceContext()->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0.0f);

@@ -68,11 +68,13 @@ bool SceneVoxelizer::init()
 		return false;
 	}
 
-	D3D11_RASTERIZER_DESC rasterStateDesc = {};
+	D3D11_RASTERIZER_DESC2 rasterStateDesc = {};
 	rasterStateDesc.CullMode = D3D11_CULL_NONE;
 	rasterStateDesc.FillMode = D3D11_FILL_SOLID;
+	rasterStateDesc.DepthClipEnable = FALSE;
+	rasterStateDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_ON;
 	
-	result = D3DContext::getCurrent()->getDevice()->CreateRasterizerState(&rasterStateDesc, &m_voxelRasterState);
+	result = D3DContext::getCurrent()->getDevice()->CreateRasterizerState2(&rasterStateDesc, &m_voxelRasterState);
 	if (FAILED(result))
 	{
 		std::cout << "Failed to create rasterizer state.. HRESULT " << result << std::endl;
@@ -94,6 +96,8 @@ bool SceneVoxelizer::init()
 		return false;
 	if (!m_pixelShader.loadCompiled(R"(CompiledShaders\Voxelization\pixelShader.cso)"))
 		return false;
+	if (!m_geometryShader.loadCompiled(R"(CompiledShaders\Voxelization\geometryShader.cso)"))
+		return false;
 
 	return true;
 }
@@ -108,10 +112,14 @@ void SceneVoxelizer::beginVoxelizationPass()
 	D3DContext::getCurrent()->getDeviceContext()->RSSetViewports(1, &m_viewport);
 	ID3D11RenderTargetView* blank = nullptr;
 	D3DContext::getCurrent()->getDeviceContext()->OMSetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 1, &m_voxelTextureUAV, nullptr);
+	float clearCol[4] = { 0,0,0,0 };
+	D3DContext::getCurrent()->getDeviceContext()->ClearUnorderedAccessViewFloat(m_voxelTextureUAV, clearCol);
 	D3DContext::getCurrent()->getDeviceContext()->RSSetState(m_voxelRasterState);
 	D3DContext::getCurrent()->getDeviceContext()->OMSetDepthStencilState(m_noDepthTestState, 0xFF);
+	D3DContext::getCurrent()->getDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_vertexShader.bind();
 	m_pixelShader.bind();
+	m_geometryShader.bind();
 }
 
 void SceneVoxelizer::endVoxelizationPass()
@@ -119,6 +127,7 @@ void SceneVoxelizer::endVoxelizationPass()
 	ID3D11UnorderedAccessView* blank = nullptr;
 	D3DContext::getCurrent()->getDeviceContext()->OMSetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 1, &blank, nullptr);
 	D3DContext::getCurrent()->getDeviceContext()->OMSetDepthStencilState(nullptr, 0xFF);
+	D3DContext::getCurrent()->getDeviceContext()->GSSetShader(nullptr, nullptr, 0);
 	D3DContext::setDefaultRasterState();
 
 	//Generate mips so we have a full sparse voxel octree from our 3d tex

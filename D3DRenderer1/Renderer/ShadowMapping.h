@@ -17,7 +17,7 @@ public:
 	bool init(float width, float height, float orthoWidth, float orthoHeight, DirectionalLight& lightInfo);
 	void destroy();
 
-	void beginFrame(DirectionalLight& lightInfo);
+	void beginFrame(DirectionalLight& lightInfo, XMFLOAT2 dimensions);
 	void endFrame();
 
 	void bindDepthTexturePS(int samplerStateBinding, int textureBinding);

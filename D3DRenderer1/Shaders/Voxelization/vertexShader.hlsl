@@ -19,7 +19,7 @@ VS_OUT main(VS_INPUT input)
 	VS_OUT output = (VS_OUT)0;
 	float4x4 transformation = mul(orthovoxel, model);
 	output.position = mul(transformation, float4(input.position, 1.0f));
-	output.fragpos = mul(transformation, float4(input.position, 1.0f)).xyz;
+	output.fragpos = output.position.xyz;
 	output.normal = mul((float3x3)inverseModel,input.normal);
 	output.texcoord = input.texcoord;
 	return output;

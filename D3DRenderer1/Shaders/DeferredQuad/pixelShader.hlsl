@@ -1,4 +1,5 @@
 #include "..\common.hlsli"
+
 SamplerState samplerState : register(s0);
 Texture2D albedoTex : register(t0);
 Texture2D fragposTex : register(t1);
@@ -68,6 +69,19 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 	return shadow;
 }
 
+
+///Voxel cone tracing magic
+
+float3 scaleAndBias(float3 p)
+{
+	float3 res;
+	res.x = 0.5f * p.x + 0.5;
+	res.y = -0.5f * p.y + 0.5;
+	res.z = 0.5f * p.z + 0.5;
+	return res;
+}
+
+
 float4 main(VS_OUT input) : SV_TARGET0
 {
 
@@ -88,6 +102,8 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float diff = max(dot(norm, lightDir), 0.0f) * diffuseIntensity;
 	float3 diffuse = light.color.xyz * diff;
 
+	float4 voxelPos = mul(input.voxelProj, float4(fragpos.xyz, 1.0f));
+	voxelPos.xyz = scaleAndBias(voxelPos.xyz);
 	float3 viewDir = normalize(input.campos - fragpos.xyz);
 	float3 halfwayDir = normalize(lightDir + viewDir);
 
@@ -101,5 +117,6 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float4 fragColor = float4(result, 1.0f);
 	float gamma = 2.2;
 	fragColor.rgb = pow(fragColor.rgb, 1.0 / gamma);
+
 	return fragColor;
 }

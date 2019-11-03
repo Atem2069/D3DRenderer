@@ -21,6 +21,7 @@ struct VS_OUT
 	float4x4 projection : PROJECTION;
 	float4x4 view : VIEW;
 	float4x4 shadowCam : LIGHTCAMERA;
+	float4x4 voxelProj : VOXELCAMERA;
 };
 
 //Flags that can be set per-frame in one const buffer
@@ -40,6 +41,8 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
+	float iblConeRatio;
+	float iblMaxDist;
 };
 
 float4x4 inverse(float4x4 m) {

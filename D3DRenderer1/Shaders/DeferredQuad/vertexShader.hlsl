@@ -5,6 +5,7 @@ cbuffer camera : register(b0)
 	matrix projection;
 	matrix view;
 	vector campos;
+	matrix voxelCam;
 }
 
 cbuffer shadowCamera : register(b2)
@@ -20,5 +21,7 @@ VS_OUT main(VS_INPUT input)
 	output.texcoord = input.texcoord;
 	output.campos = campos;
 	output.shadowCam = mul(sproj, sview);
+	output.view = view;
+	output.voxelProj = voxelCam;
 	return output;
 }

@@ -3,6 +3,7 @@
 #include "BaseRenderer.h"
 #include "VertexShader.h"
 #include "PixelShader.h"
+#include "GeometryShader.h"
 
 class SceneVoxelizer
 {
@@ -25,10 +26,10 @@ private:
 	ID3D11UnorderedAccessView* m_voxelTextureUAV;
 
 	ID3D11SamplerState* m_voxelTexSamplerState;
-	ID3D11RasterizerState* m_voxelRasterState;
+	ID3D11RasterizerState2* m_voxelRasterState;
 	ID3D11DepthStencilState* m_noDepthTestState;
-
 	VertexShader m_vertexShader;
 	PixelShader m_pixelShader;
+	GeometryShader m_geometryShader;
 
 };
