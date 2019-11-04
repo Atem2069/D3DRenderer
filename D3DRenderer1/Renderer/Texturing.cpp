@@ -15,7 +15,7 @@ bool Texture2D::init(std::string filePath)
 	DXGI_FORMAT texFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	if (m_channels == 3)
 		this->unpackRGBToRGBA(width, height, imagedata,rgbaImgData);
-	if (m_channels == 2)
+	if (m_channels == 2)s
 		texFormat = DXGI_FORMAT_R8G8_UNORM;
 	if (m_channels == 1)
 		texFormat = DXGI_FORMAT_R8_UNORM;
@@ -28,7 +28,7 @@ bool Texture2D::init(std::string filePath)
 	texDesc.Width = width;
 	texDesc.Height = height;
 	texDesc.MipLevels = 0;
-	texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	texDesc.MiscFlags =  D3D11_RESOURCE_MISC_GENERATE_MIPS;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;

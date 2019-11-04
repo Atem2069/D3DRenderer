@@ -102,7 +102,7 @@ int main()
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
-	m_object.init(R"(Models\powerplant\powerplant.obj)");
+	m_object.init(R"(Models\gallery\gallery.obj)");
 	//m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
