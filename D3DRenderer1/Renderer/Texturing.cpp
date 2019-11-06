@@ -15,7 +15,7 @@ bool Texture2D::init(std::string filePath)
 	DXGI_FORMAT texFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	if (m_channels == 3)
 		this->unpackRGBToRGBA(width, height, imagedata,rgbaImgData);
-	if (m_channels == 2)s
+	if (m_channels == 2)
 		texFormat = DXGI_FORMAT_R8G8_UNORM;
 	if (m_channels == 1)
 		texFormat = DXGI_FORMAT_R8_UNORM;

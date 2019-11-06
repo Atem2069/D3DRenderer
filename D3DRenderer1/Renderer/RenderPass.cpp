@@ -152,3 +152,85 @@ ID3D11ShaderResourceView* RenderPass::getDepthBufferView()
 { 
 	return m_depthBufferView; 
 }
+
+//Depth only renderpass
+
+bool DepthOnlyRenderPass::init(int width, int height)
+{
+	HRESULT result;
+
+	D3D11_TEXTURE2D_DESC depthBufferDesc = {};
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	depthBufferDesc.Width = width;
+	depthBufferDesc.Height = height;
+	depthBufferDesc.MiscFlags = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	result = D3DContext::getCurrent()->getDevice()->CreateTexture2D(&depthBufferDesc, nullptr, &m_depthBuffer);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create 2D Depth Texture.. HRESULT " << result << std::endl;
+		return false;
+	}
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Flags = 0;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+
+	result = D3DContext::getCurrent()->getDevice()->CreateDepthStencilView(m_depthBuffer, &dsvDesc, &m_depthStencilView);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create depth stencil view.. HRESULT " << result << std::endl;
+		return false;
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+
+	result = D3DContext::getCurrent()->getDevice()->CreateShaderResourceView(m_depthBuffer, &srvDesc, &m_depthBufferView);
+	if (FAILED(result))
+	{
+		std::cout << "Failed to create shader resource view.. HRESULT " << result << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+void DepthOnlyRenderPass::destroy()
+{
+	if (m_depthStencilView)
+		m_depthStencilView->Release();
+	if (m_depthBufferView)
+		m_depthBufferView->Release();
+	if (m_depthBuffer)
+		m_depthBuffer->Release();
+}
+
+void DepthOnlyRenderPass::begin()
+{
+	D3DContext::getCurrent()->getDeviceContext()->OMSetRenderTargets(0, nullptr, m_depthStencilView);
+	D3DContext::getCurrent()->getDeviceContext()->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+}
+
+void DepthOnlyRenderPass::bindDepthTarget(int bindingPoint)
+{
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(bindingPoint, 1, &m_depthBufferView);
+}
+
+void DepthOnlyRenderPass::bindDepthTarget(int bindingPoint, int samplerBindingPoint)
+{
+	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(samplerBindingPoint, 1, &D3DContext::m_samplerStateNearestNoMips);
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(bindingPoint, 1, &m_depthBufferView);
+}
+
+ID3D11DepthStencilView* DepthOnlyRenderPass::getDepthStencilView() { return m_depthStencilView; }
+ID3D11ShaderResourceView* DepthOnlyRenderPass::getDepthBufferView() { return m_depthBufferView; }

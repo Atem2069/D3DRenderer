@@ -25,7 +25,7 @@ PS_OUT main(VS_OUT input)
 	albedoTex.GetDimensions(width, height);
 	output.albedo = albedoTex.Sample(samplerState, input.texcoord);
 	if (output.albedo.w < 0.5f && width>0)
-		clip(-1);
+		discard;
 	if (!width || !frameFlags.doTexturing)
 		output.albedo = 1;
 	output.albedo.w = specularMap.Sample(samplerState, input.texcoord).r; //alpha component of albedo map is the specular color.

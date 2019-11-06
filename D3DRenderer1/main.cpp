@@ -102,16 +102,16 @@ int main()
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
-	m_object.init(R"(Models\gallery\gallery.obj)");
+	m_object.init(R"(Models\sanmiguel\san-miguel-low-poly.obj)");
 	//m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
-	//m_object2.scale(XMVectorSet(10, 10, 10, 0));
+	m_object2.scale(XMVectorSet(0.05, 0.05, 0.05, 0));
 	m_object2.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 0.0f));
 	Object m_object3;
 	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
-	//m_object3.scale(XMVectorSet(50, 50, 50, 0));
+	m_object3.scale(XMVectorSet(0.05, 0.05, 0.05, 0));
 	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object3.translate(XMVectorSet(-15.5f, 0.0f, -0.0f, 0.0f));
 
@@ -278,11 +278,11 @@ int main()
 
 
 		//Voxelization and shadowmap render passes - these alter the viewport so best to do first things first!
-		m_voxelizer.beginVoxelizationPass();
-		m_object.draw();
-		m_object2.draw();
-		m_object3.draw();
-		m_voxelizer.endVoxelizationPass();
+		//m_voxelizer.beginVoxelizationPass();
+		//m_object.draw();
+		//m_object2.draw();
+		//m_object3.draw();
+		//m_voxelizer.endVoxelizationPass();
 
 
 		m_shadowMap.beginFrame(m_basicLight,shadowDimensions);

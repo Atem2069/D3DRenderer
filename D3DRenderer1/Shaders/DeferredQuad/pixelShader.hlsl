@@ -39,7 +39,7 @@ float4 MSAAResolve(Texture2DMS<float4> inputTexture, int numSamples, uint2 pixel
 }
 
 
-#define BIAS 0.00006
+#define BIAS 0.000006
 
 float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir)
 {

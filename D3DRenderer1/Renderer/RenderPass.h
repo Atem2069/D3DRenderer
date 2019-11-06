@@ -35,6 +35,25 @@ private:
 	int m_renderPassType;
 };
 
+class DepthOnlyRenderPass
+{
+public:
+	bool init(int width, int height);
+	void destroy();
+
+	void begin();
+
+	void bindDepthTarget(int bindingPoint, int samplerBindingPoint);
+	void bindDepthTarget(int bindingPoint);
+
+	ID3D11DepthStencilView* getDepthStencilView();
+	ID3D11ShaderResourceView* getDepthBufferView();
+private:
+	ID3D11Texture2D* m_depthBuffer;
+	ID3D11DepthStencilView* m_depthStencilView;
+	ID3D11ShaderResourceView* m_depthBufferView;
+};
+
 class DeferredRenderPass
 {
 public:
