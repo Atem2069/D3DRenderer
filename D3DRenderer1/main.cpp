@@ -40,6 +40,7 @@ struct FrameFlags
 	int doSSAO;
 	int doSSR;
 	int doVoxelReflections;
+	int voxelDebug;
 	int doTexturing;
 	float ssaoRadius;
 	int m_kernelSize;
@@ -50,7 +51,7 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
-	//int unusedAlignment[1];
+	int unusedAlignment[3];
 };
 
 int main()
@@ -169,6 +170,7 @@ int main()
 	m_frameFlags.doSSAO = 1;
 	m_frameFlags.doSSR = 0;
 	m_frameFlags.doVoxelReflections = 1;
+	m_frameFlags.voxelDebug = 0;
 	m_frameFlags.doTexturing = 1;
 	m_frameFlags.ssaoRadius = 10.0f;
 	m_frameFlags.m_kernelSize = 64;
@@ -230,6 +232,7 @@ int main()
 			ImGui::Checkbox("SSAO Enable", (bool*)&m_frameFlags.doSSAO);
 			ImGui::Checkbox("SSR Enable", (bool*)&m_frameFlags.doSSR);
 			ImGui::Checkbox("Voxel Reflections Enable", (bool*)&m_frameFlags.doVoxelReflections);
+			ImGui::Checkbox("Voxel Debug", (bool*)&m_frameFlags.voxelDebug);
 			ImGui::Checkbox("Textures", (bool*)&m_frameFlags.doTexturing);
 			ImGui::DragFloat("SSAO Radius", (float*)&m_frameFlags.ssaoRadius);
 			ImGui::DragInt("SSAO Kernel Size", (int*)&m_frameFlags.m_kernelSize);

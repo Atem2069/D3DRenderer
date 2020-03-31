@@ -85,7 +85,7 @@ float4 voxelRayMarch(float3 o, float3 d, float4x4 voxelProj)
 {
 	o += d * 10.f;
 	float4 res = float4(0, 1, 0, 1);
-	static int MAX_STEPS = 500;
+	static int MAX_STEPS = 1000;
 	[loop]
 	for (int i = 0; i < MAX_STEPS; i++)
 	{
@@ -93,9 +93,7 @@ float4 voxelRayMarch(float3 o, float3 d, float4x4 voxelProj)
 		currentCoords = scaleAndBias2(currentCoords);
 		res = voxelTex.Sample(voxelSampler, currentCoords);
 		if (res.a > 0.25f)
-		{
 			return res;
-		}
 
 		o += d;
 	}
@@ -145,7 +143,14 @@ float4 main(VS_OUT input) : SV_TARGET0
 
 		float3 reflectDir = -reflect(voxelViewDir, normal.xyz);
 		float4 voxelRes = voxelRayMarch(voxelPos.xyz, normalize(reflectDir), input.voxelProj);
-		fragColor += voxelRes;
+		fragColor += voxelRes * 0.75f;
+
+		if (frameFlags.voxelDebug == 1)
+		{
+			voxelPos = mul(input.voxelProj, voxelPos);
+			voxelPos.xyz = scaleAndBias2(voxelPos.xyz);
+			fragColor = voxelTex.Sample(voxelSampler, voxelPos);
+		}
 	}
 
 	return fragColor;

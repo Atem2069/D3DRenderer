@@ -32,6 +32,7 @@ struct FrameFlags
 	int doSSAO;
 	int doSSR;
 	int doVoxelReflections;
+	int voxelDebug;
 	int doTexturing;
 	float ssaoRadius;
 	int kernelSize;

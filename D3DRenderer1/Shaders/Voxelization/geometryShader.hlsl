@@ -4,6 +4,9 @@
 void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 {
 	VS_OUT output[3];
+	output[0] = (VS_OUT)0;
+	output[1] = (VS_OUT)0;
+	output[2] = (VS_OUT)0;
 	float3 facenormal = abs(input[0].normal + input[1].normal + input[2].normal);
 	uint maxi = facenormal[1] > facenormal[0] ? 1 : 0;
 	maxi = facenormal[2] > facenormal[maxi] ? 2 : maxi;
@@ -13,6 +16,7 @@ void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 		output[i].position = input[i].position;
 		output[i].normal = input[i].normal;
 		output[i].texcoord = input[i].texcoord;
+		output[i].position.xyz = (output[i].position.xyz) * 256.0f;
 		if (maxi == 0)
 		{
 			output[i].position.xyz = output[i].position.zyx;
@@ -21,8 +25,6 @@ void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 		{
 			output[i].position.xyz = output[i].position.xzy;
 		}
-		output[i].fragpos = output[i].position.xyz;
-		outputStream.Append(input[i]);
 	}
 
 	// Expand triangle to get fake Conservative Rasterization:
@@ -32,6 +34,14 @@ void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 	output[0].position.xy += normalize(side2N - side0N);
 	output[1].position.xy += normalize(side0N - side1N);
 	output[2].position.xy += normalize(side1N - side2N);
+
+	for (uint i = 0; i < 3; i++)
+	{
+		output[i].position.xy *= 1.0f / 256.0f;
+		output[i].position.zw = 1;
+		output[i].fragpos = input[i].position.xyz;
+		outputStream.Append(output[i]);
+	}
 
 	outputStream.RestartStrip();
 }
