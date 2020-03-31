@@ -51,8 +51,8 @@ bool AmbientOcclusionPass::init(float width, float height, int noAOSamples, int 
 	std::vector<float> ssaoNoise;
 	for (unsigned int i = 0; i < (randomTexWidth*randomTexHeight)*4; i++)
 	{
-		ssaoNoise.push_back(randomFloats(generator) * 2.0f - 1.0f);
-		ssaoNoise.push_back(randomFloats(generator) * 2.0f - 1.0f);
+		ssaoNoise.push_back(randomFloats(generator));
+		ssaoNoise.push_back(randomFloats(generator));
 		ssaoNoise.push_back(0.0f);
 		ssaoNoise.push_back(0.0f);
 		

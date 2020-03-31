@@ -72,7 +72,7 @@ bool SceneVoxelizer::init()
 	rasterStateDesc.CullMode = D3D11_CULL_NONE;
 	rasterStateDesc.FillMode = D3D11_FILL_SOLID;
 	rasterStateDesc.DepthClipEnable = FALSE;
-	rasterStateDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_ON;
+	rasterStateDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 	
 	result = D3DContext::getCurrent()->getDevice()->CreateRasterizerState2(&rasterStateDesc, &m_voxelRasterState);
 	if (FAILED(result))

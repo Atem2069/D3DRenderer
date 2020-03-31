@@ -56,7 +56,7 @@ float4 main(VS_OUT input) : SV_TARGET
 		float4 sampleCoord = fragpos.Sample(samplerState, offset.xy);
 		float sampleDepth = sampleCoord.z * sampleCoord.w;
 		float rangeCheck = smoothstep(0.0, 1.0, frameFlags.ssaoRadius / abs(fragPos.z - sampleDepth));
-		occlusion += (sampleDepth >= m_sample.z + 0.0006 ? 0.0 : 1.0) *rangeCheck;
+		occlusion += (sampleDepth >= m_sample.z + 0.01 ? 0.0 : 1.0) *rangeCheck;
 	}
 
 	occlusion = 1.0 - (occlusion / (float)numSamples);

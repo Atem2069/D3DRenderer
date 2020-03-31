@@ -31,6 +31,7 @@ struct FrameFlags
 	int doFXAA;
 	int doSSAO;
 	int doSSR;
+	int doVoxelReflections;
 	int doTexturing;
 	float ssaoRadius;
 	int kernelSize;
@@ -41,8 +42,6 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
-	float iblConeRatio;
-	float iblMaxDist;
 };
 
 float4x4 inverse(float4x4 m) {

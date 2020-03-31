@@ -231,5 +231,8 @@
     <None Include="Shaders\common.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\voxelConeTracing.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

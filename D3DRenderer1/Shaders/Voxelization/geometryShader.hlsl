@@ -25,5 +25,13 @@ void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 		outputStream.Append(input[i]);
 	}
 
+	// Expand triangle to get fake Conservative Rasterization:
+	float2 side0N = normalize(output[1].position.xy - output[0].position.xy);
+	float2 side1N = normalize(output[2].position.xy - output[1].position.xy);
+	float2 side2N = normalize(output[0].position.xy - output[2].position.xy);
+	output[0].position.xy += normalize(side2N - side0N);
+	output[1].position.xy += normalize(side0N - side1N);
+	output[2].position.xy += normalize(side1N - side2N);
+
 	outputStream.RestartStrip();
 }

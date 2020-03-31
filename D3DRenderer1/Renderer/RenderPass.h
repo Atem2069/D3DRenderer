@@ -45,6 +45,7 @@ public:
 
 	void bindDepthTarget(int bindingPoint, int samplerBindingPoint);
 	void bindDepthTarget(int bindingPoint);
+	void unbindDepthTarget(int bindingPoint);
 
 	ID3D11DepthStencilView* getDepthStencilView();
 	ID3D11ShaderResourceView* getDepthBufferView();

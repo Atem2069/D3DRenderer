@@ -1,5 +1,5 @@
 #include "..\common.hlsli"
-
+#include "..\voxelConeTracing.hlsli"
 SamplerState samplerState : register(s0);
 Texture2D albedoTex : register(t0);
 Texture2D fragposTex : register(t1);
@@ -39,7 +39,7 @@ float4 MSAAResolve(Texture2DMS<float4> inputTexture, int numSamples, uint2 pixel
 }
 
 
-#define BIAS 0.000006
+#define BIAS 0.0006
 
 float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir)
 {
@@ -50,35 +50,57 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 
 	float currentDepth = projCoords.z;
 
-	float bias = max((BIAS * 10) * (1.0 - dot(normal, lightDir)), BIAS);
+	float bias = max((BIAS*10) * (1.0 - dot(normal, lightDir)), BIAS);
 
 	float shadow = 0.0;
 	float2 texelSize;
 	shadowTex.GetDimensions(texelSize.x, texelSize.y);
 	texelSize = 1.0f / texelSize;
-	for (int x = -1; x <= 1; ++x)
+	for (int x = -2; x <= 2; ++x)
 	{
-		for (int y = -1; y <= 1; ++y)
+		for (int y = -2; y <= 2; ++y)
 		{
 			//float pcfDepth = shadowTex.Sample(shadowSampler, projCoords.xy + float2(x, y) * texelSize).r;
 			//shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 			shadow += shadowTex.SampleCmpLevelZero(shadowSampler, projCoords.xy + float2(x, y)*texelSize, currentDepth - bias).r;
 		}
 	}
-	shadow /= 9.0;
+	shadow /= 25.0;
 	return shadow;
 }
 
 
 ///Voxel cone tracing magic
 
-float3 scaleAndBias(float3 p)
+float3 scaleAndBias5(float3 p)
 {
 	float3 res;
 	res.x = 0.5f * p.x + 0.5;
 	res.y = -0.5f * p.y + 0.5;
 	res.z = 0.5f * p.z + 0.5;
 	return res;
+}
+
+float4 voxelRayMarch(float3 o, float3 d, float4x4 voxelProj)
+{
+	o += d * 10.f;
+	float4 res = float4(0, 1, 0, 1);
+	static int MAX_STEPS = 500;
+	[loop]
+	for (int i = 0; i < MAX_STEPS; i++)
+	{
+		float3 currentCoords = mul(voxelProj, float4(o.xyz, 1.f)).xyz;
+		currentCoords = scaleAndBias2(currentCoords);
+		res = voxelTex.Sample(voxelSampler, currentCoords);
+		if (res.a > 0.25f)
+		{
+			return res;
+		}
+
+		o += d;
+	}
+
+	return float4(0,0,0,0);
 }
 
 
@@ -93,17 +115,15 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float4 fragposlightspace = mul(input.shadowCam, float4(fragpos.xyz, 1.0f));
 	if (!frameFlags.doSSAO)
 		AOFactor = 1.0f;
-	float3 ambient = 0.3f * light.color.xyz * AOFactor;
+	float3 ambient = 0.4f * light.color.xyz * AOFactor;
 
 	float3 lightDir = normalize(-light.direction.xyz);
 	float3 norm = normal.xyz;
 
-	float diffuseIntensity = 1.5f;
+	float diffuseIntensity = 2.5f * AOFactor;
 	float diff = max(dot(norm, lightDir), 0.0f) * diffuseIntensity;
 	float3 diffuse = light.color.xyz * diff;
 
-	float4 voxelPos = mul(input.voxelProj, float4(fragpos.xyz, 1.0f));
-	voxelPos.xyz = scaleAndBias(voxelPos.xyz);
 	float3 viewDir = normalize(input.campos - fragpos.xyz);
 	float3 halfwayDir = normalize(lightDir + viewDir);
 
@@ -112,11 +132,21 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float3 specular = light.color.xyz * spec;
 
 	float shadowFactor = shadowCalculation(fragposlightspace, norm, lightDir);
-
 	float3 result = (ambient + (1.0 - shadowFactor) * (diffuse + specular)) * albedo.xyz;
 	float4 fragColor = float4(result, 1.0f);
 	float gamma = 2.2;
 	fragColor.rgb = pow(fragColor.rgb, 1.0 / gamma);
+
+	//Voxel raymarching
+	if (frameFlags.doVoxelReflections==1)
+	{
+		float4 voxelPos = float4(fragpos.xyz, 1.0f);
+		float3 voxelViewDir = normalize(input.campos.xyz - voxelPos.xyz);
+
+		float3 reflectDir = -reflect(voxelViewDir, normal.xyz);
+		float4 voxelRes = voxelRayMarch(voxelPos.xyz, normalize(reflectDir), input.voxelProj);
+		fragColor += voxelRes;
+	}
 
 	return fragColor;
 }

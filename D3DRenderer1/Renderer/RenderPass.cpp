@@ -167,6 +167,8 @@ bool DepthOnlyRenderPass::init(int width, int height)
 	depthBufferDesc.Width = width;
 	depthBufferDesc.Height = height;
 	depthBufferDesc.MiscFlags = 0;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.SampleDesc.Count = 1;
 	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 
 	result = D3DContext::getCurrent()->getDevice()->CreateTexture2D(&depthBufferDesc, nullptr, &m_depthBuffer);
@@ -230,6 +232,12 @@ void DepthOnlyRenderPass::bindDepthTarget(int bindingPoint, int samplerBindingPo
 {
 	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(samplerBindingPoint, 1, &D3DContext::m_samplerStateNearestNoMips);
 	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(bindingPoint, 1, &m_depthBufferView);
+}
+
+void DepthOnlyRenderPass::unbindDepthTarget(int bindingPoint)
+{
+	ID3D11ShaderResourceView* blank = nullptr;
+	D3DContext::getCurrent()->getDeviceContext()->PSSetShaderResources(bindingPoint, 1, &blank);
 }
 
 ID3D11DepthStencilView* DepthOnlyRenderPass::getDepthStencilView() { return m_depthStencilView; }

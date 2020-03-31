@@ -39,6 +39,7 @@ struct FrameFlags
 	int doFXAA;
 	int doSSAO;
 	int doSSR;
+	int doVoxelReflections;
 	int doTexturing;
 	float ssaoRadius;
 	int m_kernelSize;
@@ -49,9 +50,7 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
-	float iblConeRatio;
-	float iblMaxDist;
-	int unusedAlignment[3];
+	//int unusedAlignment[1];
 };
 
 int main()
@@ -102,16 +101,16 @@ int main()
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
 	Object m_object;
-	m_object.init(R"(Models\sanmiguel\san-miguel-low-poly.obj)");
-	//m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
+	m_object.init(R"(Models\sponza\sponza.obj)");
+	m_object.scale(XMVectorSet(0.1, 0.1, 0.1, 0));
 	Object m_object2;
 	m_object2.init(R"(Models\materialball\export3dcoat.obj)");
-	m_object2.scale(XMVectorSet(0.05, 0.05, 0.05, 0));
+	//m_object2.scale(XMVectorSet(0.05, 0.05, 0.05, 0));
 	m_object2.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 0.0f));
 	Object m_object3;
 	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
-	m_object3.scale(XMVectorSet(0.05, 0.05, 0.05, 0));
+	//m_object3.scale(XMVectorSet(0.05, 0.05, 0.05, 0));
 	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object3.translate(XMVectorSet(-15.5f, 0.0f, -0.0f, 0.0f));
 
@@ -122,7 +121,7 @@ int main()
 	m_renderPass.specifyRenderTarget(D3DContext::getCurrent()->getBackBuffer());	//Change render target to hardware render target
 
 	RenderPass m_deferredResolvePass;
-	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, MultisampleQuality))
+	if (!m_deferredResolvePass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R16G16B16A16_FLOAT, 1, MultisampleQuality))
 		return -1;
 
 	DXGI_FORMAT formats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,DXGI_FORMAT_R16G16B16A16_FLOAT,DXGI_FORMAT_R16G16B16A16_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT,DXGI_FORMAT_R32G32B32A32_FLOAT};;
@@ -142,7 +141,7 @@ int main()
 
 	XMFLOAT2 shadowDimensions = XMFLOAT2(410, 410);
 	DirectionalShadowMap m_shadowMap;
-	if (!m_shadowMap.init(4096,4096, shadowDimensions.x,shadowDimensions.y, m_basicLight))
+	if (!m_shadowMap.init(8192,8192, shadowDimensions.x,shadowDimensions.y, m_basicLight))
 		return -1;
 
 	
@@ -168,7 +167,8 @@ int main()
 	m_frameFlags.resolution = XMFLOAT2(1600, 900);
 	m_frameFlags.doFXAA = 1;
 	m_frameFlags.doSSAO = 1;
-	m_frameFlags.doSSR = 1;
+	m_frameFlags.doSSR = 0;
+	m_frameFlags.doVoxelReflections = 1;
 	m_frameFlags.doTexturing = 1;
 	m_frameFlags.ssaoRadius = 10.0f;
 	m_frameFlags.m_kernelSize = 64;
@@ -179,8 +179,6 @@ int main()
 	m_frameFlags.tolerance = 999.0f;
 	m_frameFlags.ssrMetallic = 1.0f;
 	m_frameFlags.ssrReflectiveness = 1.0f;
-	m_frameFlags.iblConeRatio = 1.0f;
-	m_frameFlags.iblMaxDist = 1.0f;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
@@ -197,7 +195,7 @@ int main()
 		return -1;
 	
 	RenderPass m_ssrRenderPass;
-	if (!m_ssrRenderPass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0))
+	if (!m_ssrRenderPass.init(WIDTH, HEIGHT, RENDERPASS_TEXTUREBUF, DXGI_FORMAT_R16G16B16A16_FLOAT, 1, 0))
 		return -1;
 
 	SceneVoxelizer m_voxelizer;
@@ -215,6 +213,7 @@ int main()
 	m_lightUploadBuffer.uploadToPixelShader(0);
 	m_shadowMap.bindShadowCamera(2);
 	m_flagsBuffer.uploadToPixelShader(1);
+	bool voxelized = false;
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glfwPollEvents();
@@ -230,12 +229,11 @@ int main()
 			ImGui::Checkbox("FXAA Enable", (bool*)&m_frameFlags.doFXAA);
 			ImGui::Checkbox("SSAO Enable", (bool*)&m_frameFlags.doSSAO);
 			ImGui::Checkbox("SSR Enable", (bool*)&m_frameFlags.doSSR);
+			ImGui::Checkbox("Voxel Reflections Enable", (bool*)&m_frameFlags.doVoxelReflections);
 			ImGui::Checkbox("Textures", (bool*)&m_frameFlags.doTexturing);
 			ImGui::DragFloat("SSAO Radius", (float*)&m_frameFlags.ssaoRadius);
 			ImGui::DragInt("SSAO Kernel Size", (int*)&m_frameFlags.m_kernelSize);
 			ImGui::DragInt("SSAO Power", (int*)&m_frameFlags.m_ssaoPower);
-			ImGui::DragFloat("iblConeRatio", (float*)&m_frameFlags.iblConeRatio);
-			ImGui::DragFloat("iblMaxDist", (float*)&m_frameFlags.iblMaxDist);
 			if (ImGui::RadioButton("Update SSAO Kernels", true))
 				m_ambientOcclusionPass.updateKernel(m_frameFlags.m_kernelSize);
 			ImGui::DragFloat2("Shadow Dimensions", (float*)&shadowDimensions);
@@ -276,29 +274,29 @@ int main()
 		m_flagsBuffer.update((void*)&m_frameFlags, sizeof(FrameFlags));
 		m_camera.update();
 
-
-		//Voxelization and shadowmap render passes - these alter the viewport so best to do first things first!
-		//m_voxelizer.beginVoxelizationPass();
-		//m_object.draw();
-		//m_object2.draw();
-		//m_object3.draw();
-		//m_voxelizer.endVoxelizationPass();
-
-
 		m_shadowMap.beginFrame(m_basicLight,shadowDimensions);
 		m_object.draw();
 		m_object2.draw();
 		m_object3.draw();
 		m_shadowMap.endFrame();
 
+		m_camera.bind(0);
+
+		if (!voxelized)
+		{
+			m_voxelizer.beginVoxelizationPass();
+			m_object.draw();
+			m_object2.draw();
+			m_object3.draw();
+			m_voxelizer.endVoxelizationPass();
+			voxelized=true;
+		}
+
 		D3DContext::setViewport(WIDTH, HEIGHT);
-		//Hardware render pass. initial
-		//m_renderPass.begin(0.564f, 0.8f, 0.976f);
+
 		m_deferredRenderPass.begin(0.564f, 0.8f, 0.976f, 0.0f);
 		m_vertexShader.bind();
 		m_pixelShader.bind();
-
-		m_camera.bind(0);
 
 		//GPU Drawing
 		m_object.draw();

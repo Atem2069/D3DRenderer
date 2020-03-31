@@ -218,16 +218,15 @@ void Object::doCPUUpdate()
 void Object::draw()
 {
 	this->doCPUUpdate();
-	ID3D11DeviceContext* deviceContext = D3DContext::getCurrent()->getDeviceContext();	//Get reference so every call doesn't have to be getCurrent()->getDeviceContext()
-	deviceContext->IASetVertexBuffers(0, 1, &m_baseVBO, &m_stride, &m_offset);
-	deviceContext->IASetIndexBuffer(m_baseIBO, DXGI_FORMAT_R32_UINT, 0);
-	deviceContext->VSSetConstantBuffers(1, 1, &m_transformationBuffer);
-	deviceContext->PSSetSamplers(0, 1, &D3DContext::m_samplerStateAnisoFilter);
+	D3DContext::getCurrent()->getDeviceContext()->IASetVertexBuffers(0, 1, &m_baseVBO, &m_stride, &m_offset);
+	D3DContext::getCurrent()->getDeviceContext()->IASetIndexBuffer(m_baseIBO, DXGI_FORMAT_R32_UINT, 0);
+	D3DContext::getCurrent()->getDeviceContext()->VSSetConstantBuffers(1, 1, &m_transformationBuffer);
+	D3DContext::getCurrent()->getDeviceContext()->PSSetSamplers(0, 1, &D3DContext::m_samplerStateAnisoFilter);
 	for (int i = 0; i < m_meshes.size(); i++)
 	{
 		m_meshes[i].m_material.m_albedoTexture.bind(0);
 		m_meshes[i].m_material.m_specularMap.bind(1);
-		deviceContext->DrawIndexed(m_meshes[i].m_numElements, m_meshes[i].m_baseElement, m_meshes[i].m_baseVertex);
+		D3DContext::getCurrent()->getDeviceContext()->DrawIndexed(m_meshes[i].m_numElements, m_meshes[i].m_baseElement, m_meshes[i].m_baseVertex);
 	}
 }
 

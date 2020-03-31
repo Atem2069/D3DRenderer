@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseRenderer.h"
+#include "RenderPass.h"
 #include "Light.h"
 #include "VertexShader.h"
 #include "ConstantBuffer.h"
@@ -28,7 +29,7 @@ public:
 private:
 	float m_width, m_height;
 	ShadowCamera m_shadowCamera;
-
+	DepthOnlyRenderPass m_depthRenderPass;
 	ID3D11Texture2D* m_depthBuffer;
 	ID3D11ShaderResourceView* m_depthBufferView;
 	ID3D11DepthStencilView* m_depthStencilView;

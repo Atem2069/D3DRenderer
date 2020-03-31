@@ -116,7 +116,7 @@ bool D3D::init(int width, int height, bool fullscreen, HWND hwnd, int MSAALevels
 	rasterDesc.DepthClipEnable = TRUE;
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	rasterDesc.FrontCounterClockwise = FALSE;
-	rasterDesc.MultisampleEnable = TRUE;
+	rasterDesc.MultisampleEnable = FALSE;
 	rasterDesc.ScissorEnable = FALSE;
 	rasterDesc.SlopeScaledDepthBias = 0;
 
