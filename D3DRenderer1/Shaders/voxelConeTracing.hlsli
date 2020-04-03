@@ -1,8 +1,8 @@
 #define TSQRT2 2.828427
 #define SQRT2 1.414213
 #define ISQRT2 0.707106
-#define MIPMAP_HARDCAP 5.4f /* Too high mipmap levels => glitchiness, too low mipmap levels => sharpness. */
-#define VOXEL_SIZE (1/256.0) /* Size of a voxel. 128x128x128 => 1/128 = 0.0078125. */
+#define MIPMAP_HARDCAP 8.0f /* Too high mipmap levels => glitchiness, too low mipmap levels => sharpness. */
+#define VOXEL_SIZE (1.0/256.0) /* Size of a voxel. 128x128x128 => 1/128 = 0.0078125. */
 #define DIFFUSE_INDIRECT_FACTOR 1.2f /* Just changes intensity of diffuse indirect lighting. */
 
 #define vec3 float3
@@ -14,10 +14,7 @@ float3 orthogonal(float3 u) {
 	return abs(dot(u, v)) > 0.99999f ? cross(u, float3(0, 1, 0)) : cross(u, v);
 }
 
-// Scales and bias a given vector (i.e. from [-1, 1] to [0, 1]).
-float3 scaleAndBias(const float3 p) { return 0.5f * p + float3(0.5f,0.5f,0.5f); }
-
-float3 scaleAndBias2(float3 p)
+float3 scaleAndBias(float3 p)
 {
 	float3 res;
 	res.x = 0.5f * p.x + 0.5;
@@ -32,7 +29,7 @@ bool isInsideCube(const float3 p, float e) {
 }
 
 // Traces a diffuse voxel cone.
-vec3 traceDiffuseVoxelCone(const vec3 from, vec3 direction, Texture3D tex, SamplerState samplerState) {
+vec3 traceDiffuseVoxelCone(const vec3 from, vec3 direction, Texture3D tex, SamplerState samplerState, float4x4 voxelProj) {
 	direction = normalize(direction);
 
 	const float CONE_SPREAD = 3.0325;
@@ -47,12 +44,13 @@ vec3 traceDiffuseVoxelCone(const vec3 from, vec3 direction, Texture3D tex, Sampl
 	// Trace.
 	while (dist < SQRT2 && acc.a < 1) {
 		vec3 c = from + dist * direction;
-		c = scaleAndBias2(from + dist * direction);
+		c = mul(voxelProj, float4(c, 1.f)).xyz;
+		c = scaleAndBias(c);
 		float l = (1 + CONE_SPREAD * dist / VOXEL_SIZE);
 		float level = log2(l);
 		float ll = (level + 1) * (level + 1);
 		//vec4 voxel = textureLod(texture3D, c, min(MIPMAP_HARDCAP, level));
-		vec4 voxel = tex.SampleLevel(samplerState, c, min(MIPMAP_HARDCAP, level));
+		vec4 voxel = tex.SampleLevel(samplerState, c, 0);// min(MIPMAP_HARDCAP, level));
 			acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
 		dist += ll * VOXEL_SIZE * 2;
 	}

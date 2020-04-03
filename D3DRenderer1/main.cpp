@@ -97,7 +97,7 @@ int main()
 		return -1;
 
 	PerspectiveCamera m_camera;
-	if (!m_camera.init(WIDTH, HEIGHT, 60.0f, 1.0f, 10000.0f))
+	if (!m_camera.init(WIDTH, HEIGHT, 90.0f, 1.0f, 10000.0f))
 		return -1;
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
@@ -111,7 +111,7 @@ int main()
 	m_object2.translate(XMVectorSet(0.0f, 8.5f, 0.0f, 0.0f));
 	Object m_object3;
 	m_object3.init(R"(Models\nanosuit\nanosuit.obj)");
-	//m_object3.scale(XMVectorSet(0.05, 0.05, 0.05, 0));
+	//m_object3.scale(XMVectorSet(10.05, 10.05, 10.05, 0));
 	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object3.translate(XMVectorSet(-15.5f, 0.0f, -0.0f, 0.0f));
 
@@ -179,8 +179,8 @@ int main()
 	m_frameFlags.fineStepCount = 32;
 	m_frameFlags.coarseStepIncrease = 1.125f;
 	m_frameFlags.tolerance = 999.0f;
-	m_frameFlags.ssrMetallic = 1.0f;
-	m_frameFlags.ssrReflectiveness = 1.0f;
+	m_frameFlags.ssrMetallic = 0.0f;
+	m_frameFlags.ssrReflectiveness = 0.5f;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
@@ -215,7 +215,7 @@ int main()
 	m_lightUploadBuffer.uploadToPixelShader(0);
 	m_shadowMap.bindShadowCamera(2);
 	m_flagsBuffer.uploadToPixelShader(1);
-	bool voxelized = false;
+	bool voxelize = true;
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glfwPollEvents();
@@ -231,6 +231,7 @@ int main()
 			ImGui::Checkbox("FXAA Enable", (bool*)&m_frameFlags.doFXAA);
 			ImGui::Checkbox("SSAO Enable", (bool*)&m_frameFlags.doSSAO);
 			ImGui::Checkbox("SSR Enable", (bool*)&m_frameFlags.doSSR);
+			ImGui::Checkbox("Dynamic Voxelization", (bool*)&voxelize);
 			ImGui::Checkbox("Voxel Reflections Enable", (bool*)&m_frameFlags.doVoxelReflections);
 			ImGui::Checkbox("Voxel Debug", (bool*)&m_frameFlags.voxelDebug);
 			ImGui::Checkbox("Textures", (bool*)&m_frameFlags.doTexturing);
@@ -285,14 +286,15 @@ int main()
 
 		m_camera.bind(0);
 
-		if (!voxelized)
+		if (voxelize)
 		{
 			m_voxelizer.beginVoxelizationPass();
+			m_shadowMap.bindDepthTexturePS(1, 1);
 			m_object.draw();
 			m_object2.draw();
 			m_object3.draw();
 			m_voxelizer.endVoxelizationPass();
-			voxelized=true;
+			m_shadowMap.unbindDepthTexturePS(1);
 		}
 
 		D3DContext::setViewport(WIDTH, HEIGHT);
@@ -344,7 +346,6 @@ int main()
 		m_deferredRenderPass.unbindRenderTargets(0);
 		m_deferredRenderPass.unbindDepthStencilTarget(6);
 		m_deferredResolvePass.unbindRenderTargetSRV(5);
-
 		//Drawing another quad for FXAA Renderpass
 
 		m_renderPass.begin(1.0f, 1.0f, 1.0f, 1.0f);

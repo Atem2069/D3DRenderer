@@ -24,14 +24,14 @@ PS_OUT main(VS_OUT input)
 	int width, height;
 	albedoTex.GetDimensions(width, height);
 	output.albedo = albedoTex.Sample(samplerState, input.texcoord);
-	if (output.albedo.w < 0.75f && width>0)
+	if (output.albedo.w < 0.25f && width>0)
 		discard;
 	if (!width || !frameFlags.doTexturing)
 		output.albedo = 1;
 	output.albedo.w = specularMap.Sample(samplerState, input.texcoord).r; //alpha component of albedo map is the specular color.
 	specularMap.GetDimensions(width, height);
 	if (!width)	//If no spec tex is loaded..
-		output.albedo.w = .5f;
+		output.albedo.w = 1.f;
 	output.fragpos = float4(input.fragpos, 1.0f);
 	float3 norm = normalize(input.normal.xyz);
 	output.normal = float4(norm, 1.0f);

@@ -39,7 +39,8 @@ void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 	{
 		output[i].position.xy *= 1.0f / 256.0f;
 		output[i].position.zw = 1;
-		output[i].fragpos = input[i].position.xyz;
+		output[i].fragpos = input[i].fragpos.xyz;
+		output[i].fragposviewspace = input[i].fragposviewspace;
 		outputStream.Append(output[i]);
 	}
 

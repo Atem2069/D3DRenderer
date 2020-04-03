@@ -54,12 +54,12 @@ bool SceneVoxelizer::init()
 		std::cout << "Failed to create 3D Texture Unordered Access View.. HRESULT " << result << std::endl;
 		return false;
 	}
-
 	D3D11_SAMPLER_DESC voxelSamplerDesc = {};
-	voxelSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	voxelSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	voxelSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	voxelSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	voxelSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	voxelSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
 	voxelSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	voxelSamplerDesc.BorderColor[0] = 0.0f; voxelSamplerDesc.BorderColor[1] = 0.0f; voxelSamplerDesc.BorderColor[2] = 0.0f; voxelSamplerDesc.BorderColor[3] = 0.0f;
 	
 	result = D3DContext::getCurrent()->getDevice()->CreateSamplerState(&voxelSamplerDesc, &m_voxelTexSamplerState); 
 	if (FAILED(result))

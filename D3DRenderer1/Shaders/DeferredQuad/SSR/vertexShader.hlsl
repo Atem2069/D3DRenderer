@@ -6,6 +6,7 @@ cbuffer camera : register(b0)
 	matrix view;
 	matrix inverseview;
 	vector campos;
+	matrix voxelCam;
 };
 
 VS_OUT main(VS_INPUT input)
@@ -15,5 +16,7 @@ VS_OUT main(VS_INPUT input)
 	output.texcoord = input.texcoord;
 	output.projection = projection;
 	output.view = transpose(view);
+	output.campos = campos;
+	output.voxelProj = voxelCam;
 	return output;
 }

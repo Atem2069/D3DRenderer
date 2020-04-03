@@ -70,35 +70,29 @@ float shadowCalculation(float4 fragPosLightSpace, float3 normal, float3 lightDir
 }
 
 
-///Voxel cone tracing magic
-
-float3 scaleAndBias5(float3 p)
-{
-	float3 res;
-	res.x = 0.5f * p.x + 0.5;
-	res.y = -0.5f * p.y + 0.5;
-	res.z = 0.5f * p.z + 0.5;
-	return res;
-}
-
+///Voxel tracing
 float4 voxelRayMarch(float3 o, float3 d, float4x4 voxelProj)
 {
 	o += d * 10.f;
 	float4 res = float4(0, 1, 0, 1);
-	static int MAX_STEPS = 1000;
+	static int MAX_STEPS = 2000;
 	[loop]
 	for (int i = 0; i < MAX_STEPS; i++)
 	{
 		float3 currentCoords = mul(voxelProj, float4(o.xyz, 1.f)).xyz;
-		currentCoords = scaleAndBias2(currentCoords);
-		res = voxelTex.Sample(voxelSampler, currentCoords);
+		currentCoords = scaleAndBias(currentCoords);
+		res = voxelTex.SampleLevel(voxelSampler, currentCoords,0);
 		if (res.a > 0.25f)
 			return res;
 
 		o += d;
 	}
-
 	return float4(0,0,0,0);
+}
+
+float3 ComputeF0(in float4 baseColor, in float reflectance, in float metalness)
+{
+	return lerp(lerp(float3(0, 0, 0), float3(1, 1, 1), reflectance), baseColor.rgb, metalness);
 }
 
 
@@ -132,26 +126,28 @@ float4 main(VS_OUT input) : SV_TARGET0
 	float shadowFactor = shadowCalculation(fragposlightspace, norm, lightDir);
 	float3 result = (ambient + (1.0 - shadowFactor) * (diffuse + specular)) * albedo.xyz;
 	float4 fragColor = float4(result, 1.0f);
-	float gamma = 2.2;
-	fragColor.rgb = pow(fragColor.rgb, 1.0 / gamma);
 
 	//Voxel raymarching
 	if (frameFlags.doVoxelReflections==1)
 	{
 		float4 voxelPos = float4(fragpos.xyz, 1.0f);
-		float3 voxelViewDir = normalize(input.campos.xyz - voxelPos.xyz);
+		float3 voxelViewDir = (input.campos.xyz - voxelPos.xyz);
 
-		float3 reflectDir = -reflect(voxelViewDir, normal.xyz);
-		float4 voxelRes = voxelRayMarch(voxelPos.xyz, normalize(reflectDir), input.voxelProj);
-		fragColor += voxelRes * 0.75f;
+		float3 reflectDir = normalize(-reflect(voxelViewDir, normal.xyz));
+		float4 voxelRes = voxelRayMarch(voxelPos.xyz, reflectDir,input.voxelProj);
+		fragColor.xyz += voxelRes.xyz * ComputeF0(voxelRes,albedo.a,frameFlags.ssrMetallic);
 
 		if (frameFlags.voxelDebug == 1)
 		{
+			return voxelRes;
 			voxelPos = mul(input.voxelProj, voxelPos);
-			voxelPos.xyz = scaleAndBias2(voxelPos.xyz);
+			voxelPos.xyz = scaleAndBias(voxelPos.xyz);
 			fragColor = voxelTex.Sample(voxelSampler, voxelPos);
 		}
 	}
+
+	float gamma = 2.2;
+	fragColor.rgb = pow(fragColor.rgb, 1.0 / gamma);
 
 	return fragColor;
 }

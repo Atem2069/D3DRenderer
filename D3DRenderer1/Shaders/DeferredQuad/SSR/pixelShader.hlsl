@@ -79,6 +79,7 @@ float4 SSRRayMarch(inout float3 origin, in float3 direction, float4x4 projection
 	return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
+
 float3 ComputeF0(in float4 baseColor, in float reflectance, in float metalness)
 {
 	return lerp(lerp(float3(0, 0, 0), float3(1, 1, 1), reflectance), baseColor.rgb, metalness);
@@ -92,7 +93,7 @@ float4 main(VS_OUT input) : SV_TARGET
 	if (frameFlags.doSSR)
 	{
 		float3 P = gPosition.Load(int3(input.position.xy, 0)).xyz;
-		float3 N = gNormal.Load(int3(input.position.xy, 0)).xyz;;
+		float3 N = gNormal.Load(int3(input.position.xy, 0)).xyz;
 
 		float3 f0 = ComputeF0(ColorBuffer.Load(int3(input.position.xy, 0)), spec, frameFlags.ssrMetallic);
 
