@@ -15,6 +15,7 @@ struct perspectiveCameraChangeInfo
 	XMVECTOR position;
 	XMVECTOR lookAt;
 	XMVECTOR up;
+	float voxelSize;
 };
 
 class PerspectiveCamera

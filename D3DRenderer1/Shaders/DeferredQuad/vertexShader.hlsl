@@ -22,6 +22,7 @@ VS_OUT main(VS_INPUT input)
 	output.campos = campos;
 	output.shadowCam = mul(sproj, sview);
 	output.view = view;
+	output.projection = projection;
 	output.voxelProj = voxelCam;
 	return output;
 }

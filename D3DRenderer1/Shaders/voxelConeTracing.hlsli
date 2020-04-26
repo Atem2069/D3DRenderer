@@ -29,29 +29,29 @@ bool isInsideCube(const float3 p, float e) {
 }
 
 // Traces a diffuse voxel cone.
-vec3 traceDiffuseVoxelCone(const vec3 from, vec3 direction, Texture3D tex, SamplerState samplerState, float4x4 voxelProj) {
+vec3 traceDiffuseVoxelCone(vec3 from, vec3 direction, Texture3D tex, SamplerState samplerState, float4x4 voxelProj) {
 	direction = normalize(direction);
 
-	const float CONE_SPREAD = 3.0325;
+	const float CONE_SPREAD = 0.0325;
 
 	vec4 acc = 0.0f;
 
 	// Controls bleeding from close surfaces.
 	// Low values look rather bad if using shadow cone tracing.
 	// Might be a better choice to use shadow maps and lower this value.
-	float dist = 0.51953125;
-	
+	float dist = 0.051953125;
+	from += direction * 10.f;
 	// Trace.
 	while (dist < SQRT2 && acc.a < 1) {
-		vec3 c = from + dist * direction;
+		vec3 c = from + direction;
 		c = mul(voxelProj, float4(c, 1.f)).xyz;
 		c = scaleAndBias(c);
 		float l = (1 + CONE_SPREAD * dist / VOXEL_SIZE);
 		float level = log2(l);
 		float ll = (level + 1) * (level + 1);
 		//vec4 voxel = textureLod(texture3D, c, min(MIPMAP_HARDCAP, level));
-		vec4 voxel = tex.SampleLevel(samplerState, c, 0);// min(MIPMAP_HARDCAP, level));
-			acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
+		vec4 voxel = tex.SampleLevel(samplerState, c, min(MIPMAP_HARDCAP, level));
+		acc += 0.075 * ll * voxel * pow(1 - voxel.a, 2);
 		dist += ll * VOXEL_SIZE * 2;
 	}
 	return pow(acc.rgb * 2.0, vec3(1.5,1.5,1.5));

@@ -18,8 +18,8 @@ bool SceneVoxelizer::init()
 	voxelTextureDesc.Width = m_width;
 	voxelTextureDesc.Height = m_height;
 	voxelTextureDesc.Depth = m_depth;
-	voxelTextureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; //Packed as R,G,B,Voxel full?
-	voxelTextureDesc.MipLevels = 0;
+	voxelTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; //Packed as R,G,B,Voxel full?
+	voxelTextureDesc.MipLevels = 0;// 1 + floor(log2(m_width));
 	voxelTextureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 	voxelTextureDesc.Usage = D3D11_USAGE_DEFAULT;
 
@@ -33,9 +33,8 @@ bool SceneVoxelizer::init()
 	D3D11_SHADER_RESOURCE_VIEW_DESC voxelTextureViewDesc = {};
 	voxelTextureViewDesc.Format = voxelTextureDesc.Format;
 	voxelTextureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
-	voxelTextureViewDesc.Texture3D.MipLevels = -1;
+	voxelTextureViewDesc.Texture3D.MipLevels = -1;// voxelTextureDesc.MipLevels;
 	voxelTextureViewDesc.Texture3D.MostDetailedMip = 0;
-
 	result = D3DContext::getCurrent()->getDevice()->CreateShaderResourceView(m_voxelTexture, &voxelTextureViewDesc, &m_voxelTextureView);
 	if (FAILED(result))
 	{
@@ -46,7 +45,7 @@ bool SceneVoxelizer::init()
 	D3D11_UNORDERED_ACCESS_VIEW_DESC voxelTextureUnorderedViewDesc = {};
 	voxelTextureUnorderedViewDesc.Format = voxelTextureDesc.Format;
 	voxelTextureUnorderedViewDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
-	voxelTextureUnorderedViewDesc.Texture3D.WSize = m_depth;	//guessing
+	voxelTextureUnorderedViewDesc.Texture3D.WSize = m_depth;	//guessing idk
 
 	result = D3DContext::getCurrent()->getDevice()->CreateUnorderedAccessView(m_voxelTexture, &voxelTextureUnorderedViewDesc, &m_voxelTextureUAV);
 	if (FAILED(result))
@@ -55,11 +54,14 @@ bool SceneVoxelizer::init()
 		return false;
 	}
 	D3D11_SAMPLER_DESC voxelSamplerDesc = {};
+	/*border filtering used due to clamp/repeat causing ghosting when rays fall outside of SVO texture*/
 	voxelSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	voxelSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 	voxelSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	voxelSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-	voxelSamplerDesc.BorderColor[0] = 0.0f; voxelSamplerDesc.BorderColor[1] = 0.0f; voxelSamplerDesc.BorderColor[2] = 0.0f; voxelSamplerDesc.BorderColor[3] = 0.0f;
+	voxelSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	voxelSamplerDesc.MaxAnisotropy = 0.0f;
+	voxelSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//voxelSamplerDesc.BorderColor[0] = 0.564f; voxelSamplerDesc.BorderColor[1] = 0.8f; voxelSamplerDesc.BorderColor[2] = 0.976f; voxelSamplerDesc.BorderColor[3] = 1.0f;
 	
 	result = D3DContext::getCurrent()->getDevice()->CreateSamplerState(&voxelSamplerDesc, &m_voxelTexSamplerState); 
 	if (FAILED(result))
@@ -72,7 +74,7 @@ bool SceneVoxelizer::init()
 	rasterStateDesc.CullMode = D3D11_CULL_NONE;
 	rasterStateDesc.FillMode = D3D11_FILL_SOLID;
 	rasterStateDesc.DepthClipEnable = FALSE;
-	rasterStateDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+	rasterStateDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;	//software emulated because amd gpus don't support it fuck
 	
 	result = D3DContext::getCurrent()->getDevice()->CreateRasterizerState2(&rasterStateDesc, &m_voxelRasterState);
 	if (FAILED(result))
@@ -82,8 +84,7 @@ bool SceneVoxelizer::init()
 	}
 
 	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-	dsDesc.DepthEnable = TRUE;
-	dsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+	dsDesc.DepthEnable = FALSE;
 	dsDesc.StencilEnable = FALSE;
 	result = D3DContext::getCurrent()->getDevice()->CreateDepthStencilState(&dsDesc, &m_noDepthTestState);
 	if (FAILED(result))

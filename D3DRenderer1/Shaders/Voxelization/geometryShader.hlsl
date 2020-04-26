@@ -16,7 +16,11 @@ void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 		output[i].position = input[i].position;
 		output[i].normal = input[i].normal;
 		output[i].texcoord = input[i].texcoord;
-		output[i].position.xyz = (output[i].position.xyz) * 256.0f;
+		output[i].fragpos = input[i].fragpos.xyz;
+		output[i].fragposviewspace = input[i].fragposviewspace;
+		output[i].shadowCam = input[i].shadowCam;
+		output[i].position.xyz = (output[i].position.xyz) * VOXELSIZE;
+		output[i].campos = input[i].campos;
 		if (maxi == 0)
 		{
 			output[i].position.xyz = output[i].position.zyx;
@@ -37,10 +41,8 @@ void main(triangle VS_OUT input[3], inout TriangleStream<VS_OUT> outputStream)
 
 	for (uint i = 0; i < 3; i++)
 	{
-		output[i].position.xy *= 1.0f / 256.0f;
+		output[i].position.xy *= 1.0f / VOXELSIZE;
 		output[i].position.zw = 1;
-		output[i].fragpos = input[i].fragpos.xyz;
-		output[i].fragposviewspace = input[i].fragposviewspace;
 		outputStream.Append(output[i]);
 	}
 

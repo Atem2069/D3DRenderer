@@ -1,3 +1,4 @@
+#define VOXELSIZE 256.0f;
 //Data given to the input assembler
 struct VS_INPUT
 {
@@ -32,6 +33,7 @@ struct FrameFlags
 	int doSSAO;
 	int doSSR;
 	int doVoxelReflections;
+	int doVoxelGI;
 	int voxelDebug;
 	int doTexturing;
 	float ssaoRadius;
@@ -43,6 +45,7 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
+	int coneCount;
 };
 
 float4x4 inverse(float4x4 m) {

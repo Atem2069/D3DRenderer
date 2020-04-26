@@ -4,7 +4,6 @@ cbuffer camera : register(b0)
 {
 	matrix projection;
 	matrix view;
-	matrix inverseview;
 	vector campos;
 	matrix voxelCam;
 };

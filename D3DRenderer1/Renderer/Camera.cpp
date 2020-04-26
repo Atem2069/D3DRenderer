@@ -4,12 +4,14 @@ bool PerspectiveCamera::init(float width, float height, float fovDeg, float minD
 {
 	HRESULT result;
 
-	cameraChangeInfo.position = XMVectorSet(0.0f, 0.0f, -5.0f,1.0f);
+	cameraChangeInfo.position = XMVectorSet(0.0f, 0.0f, 0.0f,1.0f);
 	cameraChangeInfo.lookAt = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f);
 	cameraChangeInfo.up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	cameraChangeInfo.voxelSize = 300.f;
+
 	m_cameraBuffer.projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fovDeg), width / height, minDepth, maxDepth);
 	m_cameraBuffer.view = XMMatrixLookAtLH(cameraChangeInfo.position, cameraChangeInfo.lookAt, cameraChangeInfo.up);
-	m_cameraBuffer.orthoVoxel = XMMatrixOrthographicLH(256, 256, 0.f, 256.0f);
+	m_cameraBuffer.orthoVoxel = XMMatrixOrthographicLH(cameraChangeInfo.voxelSize, cameraChangeInfo.voxelSize, 0, cameraChangeInfo.voxelSize/2.f);
 	//Const buffer descriptor etc
 	D3D11_BUFFER_DESC constBufferDesc = {};
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -37,6 +39,7 @@ void PerspectiveCamera::update()
 	//Update CPU side
 	m_cameraBuffer.view = XMMatrixLookAtLH(cameraChangeInfo.position, cameraChangeInfo.position + cameraChangeInfo.lookAt, cameraChangeInfo.up);
 	m_cameraBuffer.position = cameraChangeInfo.position;
+	m_cameraBuffer.orthoVoxel = XMMatrixOrthographicLH(cameraChangeInfo.voxelSize, cameraChangeInfo.voxelSize, 0, cameraChangeInfo.voxelSize / 2.f);
 	//Upload GPU
 	D3D11_MAPPED_SUBRESOURCE bufferPtr;
 	HRESULT result = D3DContext::getCurrent()->getDeviceContext()->Map(m_constBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferPtr);

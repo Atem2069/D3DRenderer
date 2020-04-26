@@ -26,9 +26,10 @@ VS_OUT main(VS_INPUT input)
 	float4x4 transformation = mul(orthovoxel, model);
 	output.position = mul(transformation, float4(input.position, 1.0f));
 	output.fragpos = output.position.xyz;
-	output.fragposviewspace.xyz = input.position.xyz;
+	output.fragposviewspace = mul(model, float4(input.position.xyz, 1.f));
 	output.normal = mul((float3x3)inverseModel,input.normal);
 	output.texcoord = input.texcoord;
 	output.shadowCam = mul(sproj, sview);
+	output.campos = campos;
 	return output;
 }

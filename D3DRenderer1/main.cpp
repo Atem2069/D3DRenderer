@@ -40,6 +40,7 @@ struct FrameFlags
 	int doSSAO;
 	int doSSR;
 	int doVoxelReflections;
+	int doVoxelGI;
 	int voxelDebug;
 	int doTexturing;
 	float ssaoRadius;
@@ -51,7 +52,8 @@ struct FrameFlags
 	float tolerance;
 	float ssrReflectiveness;
 	float ssrMetallic;
-	int unusedAlignment[3];
+	int coneCount;
+	int unusedAlignment[1];
 };
 
 int main()
@@ -97,7 +99,7 @@ int main()
 		return -1;
 
 	PerspectiveCamera m_camera;
-	if (!m_camera.init(WIDTH, HEIGHT, 90.0f, 1.0f, 10000.0f))
+	if (!m_camera.init(WIDTH, HEIGHT, 75.0f, 1.0f, 10000.0f))
 		return -1;
 	m_camera.cameraChangeInfo.position = XMVectorSet(0, 0, 5.0f, 0);
 	m_camera.cameraChangeInfo.lookAt = XMVectorSet(0, 0, -1.0f, 0);
@@ -114,7 +116,6 @@ int main()
 	//m_object3.scale(XMVectorSet(10.05, 10.05, 10.05, 0));
 	m_object3.rotate(XMVectorSet(0, 1, 0, 0), 90.0f);
 	m_object3.translate(XMVectorSet(-15.5f, 0.0f, -0.0f, 0.0f));
-
 
 	RenderPass m_renderPass;
 	if (!m_renderPass.init(WIDTH, HEIGHT,RENDERPASS_SWAPCHAINBUF, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,1,MultisampleQuality))	//if RENDERPASS_SWAPCHAINBUF specified then no rendertargetview, render buffer or shader resource view is created.
@@ -170,6 +171,7 @@ int main()
 	m_frameFlags.doSSAO = 1;
 	m_frameFlags.doSSR = 0;
 	m_frameFlags.doVoxelReflections = 1;
+	m_frameFlags.doVoxelGI = 1;
 	m_frameFlags.voxelDebug = 0;
 	m_frameFlags.doTexturing = 1;
 	m_frameFlags.ssaoRadius = 10.0f;
@@ -181,6 +183,7 @@ int main()
 	m_frameFlags.tolerance = 999.0f;
 	m_frameFlags.ssrMetallic = 0.0f;
 	m_frameFlags.ssrReflectiveness = 0.5f;
+	m_frameFlags.coneCount = 8;
 	ConstantBuffer m_flagsBuffer;
 	if (!m_flagsBuffer.init(&m_frameFlags, sizeof(FrameFlags)))
 		return -1;
@@ -201,7 +204,8 @@ int main()
 		return -1;
 
 	SceneVoxelizer m_voxelizer;
-	m_voxelizer.init();
+	if (!m_voxelizer.init())
+		return -1;
 
 	//For camera
 	float pitch = 0, yaw = 0;
@@ -233,6 +237,7 @@ int main()
 			ImGui::Checkbox("SSR Enable", (bool*)&m_frameFlags.doSSR);
 			ImGui::Checkbox("Dynamic Voxelization", (bool*)&voxelize);
 			ImGui::Checkbox("Voxel Reflections Enable", (bool*)&m_frameFlags.doVoxelReflections);
+			ImGui::Checkbox("Voxel GI Enable", (bool*)&m_frameFlags.doVoxelGI);
 			ImGui::Checkbox("Voxel Debug", (bool*)&m_frameFlags.voxelDebug);
 			ImGui::Checkbox("Textures", (bool*)&m_frameFlags.doTexturing);
 			ImGui::DragFloat("SSAO Radius", (float*)&m_frameFlags.ssaoRadius);
@@ -253,7 +258,7 @@ int main()
 		}
 		ImGui::End();
 
-		ImGui::Begin("SSR Properties");
+		ImGui::Begin("Reflection Properties");
 		{
 			ImGui::DragInt("Coarse Step Count", (int*)&m_frameFlags.coarseStepCount);
 			ImGui::DragInt("Fine Step Count", (int*)&m_frameFlags.fineStepCount);
@@ -261,6 +266,8 @@ int main()
 			ImGui::DragFloat("Tolerance", (float*)&m_frameFlags.tolerance);
 			ImGui::DragFloat("Reflectiveness", (float*)&m_frameFlags.ssrReflectiveness,0.005f,0.0f,1.0f);
 			ImGui::DragFloat("Metallic factor", (float*)&m_frameFlags.ssrMetallic,0.005f,0.0f,1.0f);
+			ImGui::DragFloat("Voxel Camera Bound", (float*)&m_camera.cameraChangeInfo.voxelSize);
+			ImGui::DragInt("Voxel Cone Count", (int*)&m_frameFlags.coneCount, 1.0f, 0, 16);
 		}
 		ImGui::End();
 
@@ -289,12 +296,12 @@ int main()
 		if (voxelize)
 		{
 			m_voxelizer.beginVoxelizationPass();
-			m_shadowMap.bindDepthTexturePS(1, 1);
+			m_shadowMap.bindDepthTexturePS(1, 4);
 			m_object.draw();
 			m_object2.draw();
 			m_object3.draw();
 			m_voxelizer.endVoxelizationPass();
-			m_shadowMap.unbindDepthTexturePS(1);
+			m_shadowMap.unbindDepthTexturePS(4);
 		}
 
 		D3DContext::setViewport(WIDTH, HEIGHT);
@@ -335,7 +342,7 @@ int main()
 		m_voxelizer.unbindVoxelTexture(6);
 
 
-		//Doing screenspace reflections!!!
+		//Doing screenspace reflections renderpass
 		m_ssrRenderPass.begin(1, 1, 1, 1);
 		m_ssrVertexShader.bind();
 		m_ssrPixelShader.bind();

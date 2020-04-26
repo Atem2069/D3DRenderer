@@ -4,6 +4,8 @@ cbuffer shadowCamera : register(b0)
 {
 	matrix shadowProj;
 	matrix shadowView;
+	vector campos;
+	matrix orthovoxel;
 }
 
 cbuffer object : register(b1)
